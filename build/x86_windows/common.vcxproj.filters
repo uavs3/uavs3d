@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\source\decore\sse\alf_sse.c">
+      <Filter>sse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\decore\sse\deblock_sse.c">
+      <Filter>sse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\decore\sse\inter_pred_sse.c">
+      <Filter>sse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\decore\sse\intra_pred_sse.c">
+      <Filter>sse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\decore\sse\itrans_sse.c">
+      <Filter>sse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\decore\sse\pixel_sse.c">
+      <Filter>sse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\decore\sse\sao_sse.c">
+      <Filter>sse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\decore\sse\sse.c">
+      <Filter>sse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\decore\avx2\alf_avx2.c">
+      <Filter>avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\decore\avx2\avx2.c">
+      <Filter>avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\decore\avx2\inter_pred_avx2.c">
+      <Filter>avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\decore\avx2\intra_pred_avx2.c">
+      <Filter>avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\decore\avx2\itrans_avx2.c">
+      <Filter>avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\decore\avx2\pixel_avx2.c">
+      <Filter>avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\decore\avx2\sao_avx2.c">
+      <Filter>avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\decore\alf.c" />
+    <ClCompile Include="..\..\source\decore\com_table.c" />
+    <ClCompile Include="..\..\source\decore\com_util.c" />
+    <ClCompile Include="..\..\source\decore\deblock.c" />
+    <ClCompile Include="..\..\source\decore\inter_pred.c" />
+    <ClCompile Include="..\..\source\decore\intra_pred.c" />
+    <ClCompile Include="..\..\source\decore\inv_trans.c" />
+    <ClCompile Include="..\..\source\decore\pic_manager.c" />
+    <ClCompile Include="..\..\source\decore\recon.c" />
+    <ClCompile Include="..\..\source\decore\sao.c" />
+    <ClCompile Include="..\..\source\decore\threadpool.c" />
+    <ClCompile Include="..\..\source\decore\win32thread.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\source\decore\sse\sse.h">
+      <Filter>sse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\decore\avx2\avx2.h">
+      <Filter>avx2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\decore\com_def.h" />
+    <ClInclude Include="..\..\source\decore\com_sys.h" />
+    <ClInclude Include="..\..\source\decore\com_table.h" />
+    <ClInclude Include="..\..\source\decore\com_type.h" />
+    <ClInclude Include="..\..\source\decore\com_util.h" />
+    <ClInclude Include="..\..\source\decore\modules.h" />
+    <ClInclude Include="..\..\source\decore\threadpool.h" />
+    <ClInclude Include="..\..\source\decore\win32thread.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="avx2">
+      <UniqueIdentifier>{340279a0-726f-4160-815c-fd64856b8480}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sse">
+      <UniqueIdentifier>{c020335b-e9c5-4a35-8a21-bb603784d596}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
