@@ -20,7 +20,445 @@
 
 #include "def_armv7.S"
 
+#define SIMPLIFIED_ALF_ARMV7 1
+
 #if !COMPILE_10BIT
+
+#if SIMPLIFIED_ALF_ARMV7
+/*********************************************************************************************************************************************
+ *  void uavs3d_alf_one_lcu_armv7(pel *dst, int i_dst, pel *src, int i_src, int lcu_width, int lcu_height, int *coef, int sample_bit_depth);
+ *  dst->r0, i_dst->r1, src->r2, i_src->r3, lcu_width->r4, lcu_height->r5, coef->r6
+ **********************************************************************************************************************************************/
+function uavs3d_alf_one_lcu_armv7
+	stmdb sp!, {r4-r12, lr}
+	add sp, sp, #40
+	ldmia sp, {r4, r5, r6}
+	sub sp, sp, #40
+
+    vld1.32 {q0, q1}, [r6]!         // load coef[0-7]
+    vld1.32 {q2}, [r6]              // load coef[8]
+    vmovn.i32 d0, q0
+    vmovn.i32 d1, q1
+    vmovn.i32 d2, q2
+
+    mov r8, #0                      // i = startPos
+
+alf_luma_loop_y:
+    sub r9 , r2, r3                 // imgPad2 = src - i_src;
+    add r10, r2, r3                 // imgPad1 = src + i_src;
+    sub r11, r2, r3, lsl #1         // imgPad4 = src - 2*i_src;
+    add r12, r2, r3, lsl #1         // imgPad3 = src + 2*i_src;
+    sub r6, r11, r3                 // imgPad6 = src - 3*i_src;
+    add r7, r12, r3                 // imgPad5 = src + 3*i_src;
+
+    cmp r8, #3
+    bge alf_luma_y_ge_3
+    cmp r8, #1
+    movlt r9, r2                    // i == 0
+    movle r11, r9                   // i == 1
+    mov   r6, r11                   // i == 2
+
+    b alf_luma_y_lt_h_minus_3
+
+alf_luma_y_ge_3:
+    sub r5, #3
+    cmp r8, r5
+    add r5, #3
+    blt alf_luma_y_lt_h_minus_3
+    sub r5, #2
+    cmp r8, r5
+    movgt r10, r2                   // i == lcu_height - 1
+    movge r12, r10                  // i == lcu_height - 2
+    mov   r7, r12                   // i == lcu_height - 3
+    add   r5, #2
+
+alf_luma_y_lt_h_minus_3:
+
+    vmov d3, r9, r10
+    vmov d4, r6, r7
+    vmov d5, r11, r12
+    mov r6, #0                      // j = 0
+alf_luma_loop_x:
+    vdup.u32 q3, r6
+    vadd.u32 q8, q2, q3
+
+    vmov r9, r10, d16
+    vmov r11, r12, d17
+
+    vld1.64 {d20}, [r9]
+    vld1.64 {d21}, [r10]
+    vld1.64 {d22}, [r11]
+    vld1.64 {d23}, [r12]
+
+    vaddl.u8 q10, d20, d21
+    vaddl.u8 q11, d22, d23
+    vmul.s16 q10, q10, d0[0]        // pixelInt  = coef[0] * (imgPad5[j] + imgPad6[j]);
+    vmla.s16 q10, q11, d0[1]        // pixelInt += coef[1] * (imgPad3[j] + imgPad4[j]);
+
+    vadd.u32 d16, d6, d3
+    vmov r9, r10, d16
+    sub r11, r9, #1
+    sub r12, r10, #1
+    vld1.64 {d22}, [r9]             // load imgPad2[j]
+    vld1.64 {d23}, [r10]            // load imgPad1[j]
+    add r9, r9, #1
+    add r10, r10, #1
+    vld1.64 {d24}, [r11]            // load imgPad2[j-1]
+    vld1.64 {d25}, [r12]            // load imgPad1[j-1]
+    vld1.64 {d26}, [r9]             // load imgPad2[j+1]
+    vld1.64 {d27}, [r10]            // load imgPad1[j+1]
+
+    vaddl.u8 q11, d22, d23          // imgPad2[j] + imgPad1[j]
+    vaddl.u8 q14, d27, d24          // imgPad1[j+1] + imgPad2[j-1]
+    vaddl.u8 q15, d26, d25          // imgPad2[j+1] + imgPad1[j-1]
+
+    vmla.s16 q10, q14, d0[2]        // pixelInt += coef[2] * (imgPad1[j + 1] + imgPad2[j - 1])
+    vmla.s16 q10, q11, d0[3]        // pixelInt += coef[3] * (imgPad1[j] + imgPad2[j])
+    vmla.s16 q10, q15, d1[0]        // pixelInt += coef[4] * (imgPad1[j - 1] + imgPad2[j + 1])
+
+    add r11, r2, r6
+    sub r11, r11, #3
+    vld1.64 {q12}, [r11]            // load imgPad[j-3]
+
+    vext.8 d26, d24, d25, #1        // imgPad[j-2]
+    vext.8 d27, d24, d25, #2        // imgPad[j-1]
+    vext.8 d28, d24, d25, #3        // imgPad[j]
+    vext.8 d29, d24, d25, #4        // imgPad[j+1]
+    vext.8 d30, d24, d25, #5        // imgPad[j+2]
+    vext.8 d31, d24, d25, #6        // imgPad[j+3]
+
+    vaddl.u8 q8, d24, d31           // imgPad[j+3] + imgPad[j-3]
+    vaddl.u8 q9, d26, d30           // imgPad[j+2] + imgPad[j-2]
+    vaddl.u8 q11, d27, d29          // imgPad[j+1] + imgPad[j-1]
+    vmovl.u8 q12, d28               // imgPad[j]
+
+    vmla.s16 q10, q8, d1[1]         // pixelInt += coef[5] * (imgPad[j + 3] + imgPad[j - 3])
+    vmla.s16 q10, q9, d1[2]         // pixelInt += coef[6] * (imgPad[j + 2] + imgPad[j - 2])
+    vmla.s16 q10, q11, d1[3]        // pixelInt += coef[7] * (imgPad[j + 1] + imgPad[j - 1])
+    vmla.s16 q10, q12, d2[0]        // pixelInt += coef[8] * (imgPad[j])
+
+    add   r9, r0, r6
+    vqrshrun.s16 d20, q10, #6
+
+    add   r6, r6, #8
+    vst1.64 {d20}, [r9]             // store imgRes[j]
+
+    cmp   r6, r4
+    blt   alf_luma_loop_x
+
+    add   r8, r8, #1
+    add   r0, r0, r1
+    add   r2, r2, r3
+    cmp   r8, r5
+    blt   alf_luma_loop_y
+
+	ldmia sp!, {r4-r12, pc}
+
+
+/****************************************************************************************************************************************************************************************************************
+ *  void uavs3d_alf_one_lcu_chroma_armv7(pel *dst, int i_dst, pel *src, int i_src, int lcu_width, int lcu_height, int *coef, int sample_bit_depth);
+ *  dst->r0, i_dst->r1, src->r2, i_src->r3, lcu_width->r4, lcu_height->r5, coef->r6
+ *****************************************************************************************************************************************************************************************************************/
+function uavs3d_alf_one_lcu_chroma_armv7
+	stmdb sp!, {r4-r12, lr}
+	add sp, sp, #40
+	ldmia sp, {r4, r5, r6}
+	sub sp, sp, #40
+
+    vld1.32 {q0, q1}, [r6]!         // load coef[0-7]
+    vld1.32 {q2, q3}, [r6]!
+    vmovn.i32 d0, q0
+    vmovn.i32 d1, q1
+    vmovn.i32 d2, q2
+    vmovn.i32 d3, q3
+    vld1.32 {q8}, [r6]              // load coef[8]
+    vmovn.i32 d4, q8
+
+    mov r8, #0                      // i = startPos
+    lsl r4, #1                      // lcu_width *= 2
+alf_chroma_loop_y:
+    sub r9 , r2, r3                 // imgPad2 = src - i_src;
+    add r10, r2, r3                 // imgPad1 = src + i_src;
+    sub r11, r2, r3, lsl #1         // imgPad4 = src - 2*i_src;
+    add r12, r2, r3, lsl #1         // imgPad3 = src + 2*i_src;
+    sub r6, r11, r3                 // imgPad6 = src - 3*i_src;
+    add r7, r12, r3                 // imgPad5 = src + 3*i_src;
+
+    cmp r8, #3
+    bge alf_chroma_y_ge_3
+    cmp r8, #1
+    movlt r9, r2                    // i == 0
+    movle r11, r9                   // i == 1
+    mov   r6, r11                   // i == 2
+
+    b alf_chroma_y_lt_h_minus_3
+
+alf_chroma_y_ge_3:
+    sub r5, #3
+    cmp r8, r5
+    add r5, #3
+    blt alf_chroma_y_lt_h_minus_3
+    sub r5, #2
+    cmp r8, r5
+    movgt r10, r2                   // i == lcu_height - 1
+    movge r12, r10                  // i == lcu_height - 2
+    mov   r7, r12                   // i == lcu_height - 3
+    add   r5, #2
+
+alf_chroma_y_lt_h_minus_3:
+
+    vmov d5, r9, r10
+    vmov d6, r6, r7
+    vmov d7, r11, r12
+    mov r6, #0                      // j = 0
+alf_chroma_loop_x:
+    vdup.u32 q9, r6
+    vadd.u32 q8, q3, q9
+
+    vmov r9, r10, d16
+    vmov r11, r12, d17
+
+    vld1.64 {d20}, [r9]
+    vld1.64 {d21}, [r10]
+    vld1.64 {d22}, [r11]
+    vld1.64 {d23}, [r12]
+
+    vdup.32 q12, d0[0]
+    vdup.32 q13, d0[1]
+
+    vaddl.u8 q10, d20, d21
+    vaddl.u8 q11, d22, d23
+    vmul.s16 q10, q10, q12          // pixelInt  = coef[0] * (imgPad5[j] + imgPad6[j]);
+    vmla.s16 q10, q11, q13          // pixelInt += coef[1] * (imgPad3[j] + imgPad4[j]);
+
+    vadd.u32 d16, d18, d5
+    vmov r9, r10, d16
+    sub r11, r9, #2
+    sub r12, r10, #2
+    vld1.64 {d22}, [r9]             // load imgPad2[j]
+    vld1.64 {d23}, [r10]            // load imgPad1[j]
+    add r9, r9, #2
+    add r10, r10, #2
+    vld1.64 {d24}, [r11]            // load imgPad2[j-1]
+    vld1.64 {d25}, [r12]            // load imgPad1[j-1]
+    vld1.64 {d26}, [r9]             // load imgPad2[j+1]
+    vld1.64 {d27}, [r10]            // load imgPad1[j+1]
+
+    vaddl.u8 q11, d22, d23          // imgPad2[j] + imgPad1[j]
+    vaddl.u8 q14, d27, d24          // imgPad1[j+1] + imgPad2[j-1]
+    vaddl.u8 q15, d26, d25          // imgPad2[j+1] + imgPad1[j-1]
+
+    vdup.32 q8, d1[0]
+    vdup.32 q9, d1[1]
+    vdup.32 q12, d2[0]
+
+    vmla.s16 q10, q14, q8           // pixelInt += coef[2] * (imgPad1[j + 1] + imgPad2[j - 1])
+    vmla.s16 q10, q11, q9           // pixelInt += coef[3] * (imgPad1[j] + imgPad2[j])
+    vmla.s16 q10, q15, q12          // pixelInt += coef[4] * (imgPad1[j - 1] + imgPad2[j + 1])
+
+    add r11, r2, r6
+    sub r11, r11, #6
+    vld1.64 {q12, q13}, [r11]       // load imgPad[j-3]
+
+    vext.16 d27, d24, d25, #1       // imgPad[j-2]
+    vext.16 d28, d24, d25, #2       // imgPad[j-1]
+    vext.16 d29, d24, d25, #3       // imgPad[j]
+                                    // d25: imgPad[j+1]
+    vext.16 d30, d25, d26, #1       // imgPad[j+2]
+    vext.16 d31, d25, d26, #2       // imgPad[j+3]
+
+    vaddl.u8 q8, d24, d31           // imgPad[j+3] + imgPad[j-3]
+    vaddl.u8 q9, d27, d30           // imgPad[j+2] + imgPad[j-2]
+    vaddl.u8 q11, d28, d25          // imgPad[j+1] + imgPad[j-1]
+    vmovl.u8 q12, d29               // imgPad[j]
+
+    vdup.32 q13, d2[1]
+    vdup.32 q14, d3[0]
+    vdup.32 q15, d3[1]
+
+    vmla.s16 q10, q8, q13           // pixelInt += coef[5] * (imgPad[j + 3] + imgPad[j - 3])
+    vmla.s16 q10, q9, q14           // pixelInt += coef[6] * (imgPad[j + 2] + imgPad[j - 2])
+    vdup.32 q13, d4[0]
+    vmla.s16 q10, q11, q15          // pixelInt += coef[7] * (imgPad[j + 1] + imgPad[j - 1])
+    vmla.s16 q10, q12, q13          // pixelInt += coef[8] * (imgPad[j])
+
+    add   r9, r0, r6
+    vqrshrun.s16 d20, q10, #6
+
+    add   r6, r6, #8
+    vst1.64 {d20}, [r9]             // store imgRes[j]
+
+    cmp   r6, r4
+    blt   alf_chroma_loop_x
+
+    add   r8, r8, #1
+    add   r0, r0, r1
+    add   r2, r2, r3
+    cmp   r8, r5
+    blt   alf_chroma_loop_y
+
+	ldmia sp!, {r4-r12, pc}
+
+
+/****************************************************************************************************************************************************************************************************************
+ *  void uavs3d_alf_one_lcu_one_chroma_armv7(pel *dst, int i_dst, pel *src, int i_src, int lcu_width, int lcu_height, int *coef, int sample_bit_depth);
+ *  dst->r0, i_dst->r1, src->r2, i_src->r3, lcu_width->r4, lcu_height->r5, coef->r6
+ *****************************************************************************************************************************************************************************************************************/
+function uavs3d_alf_one_lcu_one_chroma_armv7
+	stmdb sp!, {r4-r12, lr}
+	add sp, sp, #40
+	ldmia sp, {r4, r5, r6}
+	sub sp, sp, #40
+
+    vld1.32 {q0, q1}, [r6]!         // load coef[0-7]
+    vld1.32 {q2, q3}, [r6]!
+    vmovn.i32 d0, q0
+    vmovn.i32 d1, q1
+    vmovn.i32 d2, q2
+    vmovn.i32 d3, q3
+    vld1.32 {q8}, [r6]              // load coef[8]
+    vmovn.i32 d4, q8
+
+    mov r10, #0x00ff
+    vdup.s16 q3, r10                // mask_uv
+
+    vmovn.i32 d0, q0
+    vmovn.i32 d1, q1
+    vmovn.i32 d2, q2
+
+    mov r8, #0                      // i = startPos
+    lsl r4, #1                      // lcu_width *= 2
+alf_one_chroma_loop_y:
+    sub r9 , r2, r3                 // imgPad2 = src - i_src;
+    add r10, r2, r3                 // imgPad1 = src + i_src;
+    sub r11, r2, r3, lsl #1         // imgPad4 = src - 2*i_src;
+    add r12, r2, r3, lsl #1         // imgPad3 = src + 2*i_src;
+    sub r6, r11, r3                 // imgPad6 = src - 3*i_src;
+    add r7, r12, r3                 // imgPad5 = src + 3*i_src;
+
+    cmp r8, #3
+    bge alf_one_chroma_y_ge_3
+    cmp r8, #1
+    movlt r9, r2                    // i == 0
+    movle r11, r9                   // i == 1
+    mov   r6, r11                   // i == 2
+
+    b alf_one_chroma_y_lt_h_minus_3
+
+alf_one_chroma_y_ge_3:
+    sub r5, #3
+    cmp r8, r5
+    add r5, #3
+    blt alf_one_chroma_y_lt_h_minus_3
+    sub r5, #2
+    cmp r8, r5
+    movgt r10, r2                   // i == lcu_height - 1
+    movge r12, r10                  // i == lcu_height - 2
+    mov   r7, r12                   // i == lcu_height - 3
+    add   r5, #2
+
+alf_one_chroma_y_lt_h_minus_3:
+
+    vmov d3, r9, r10
+    vmov d4, r6, r7
+    vmov d5, r11, r12
+    mov r6, #0                      // j = 0
+alf_one_chroma_loop_x:
+    vdup.u32 q9, r6
+    vadd.u32 q8, q2, q9
+
+    vmov r9, r10, d16
+    vmov r11, r12, d17
+
+    vld1.64 {q10}, [r9]
+    vld1.64 {q11}, [r10]
+    vld1.64 {q12}, [r11]
+    vld1.64 {q13}, [r12]
+    vmovn.i16 d20, q10
+    vmovn.i16 d21, q11
+    vmovn.i16 d22, q12
+    vmovn.i16 d23, q13
+
+    vaddl.u8 q10, d20, d21
+    vaddl.u8 q11, d22, d23
+    vmul.s16 q10, q10, d0[0]        // pixelInt  = coef[0] * (imgPad5[j] + imgPad6[j]);
+    vmla.s16 q10, q11, d0[1]        // pixelInt += coef[1] * (imgPad3[j] + imgPad4[j]);
+
+    vadd.u32 d16, d18, d3
+    vmov r9, r10, d16
+    sub r11, r9, #2
+    sub r12, r10, #2
+    vld1.64 {q12}, [r9]             // load imgPad2[j]
+    vld1.64 {q13}, [r10]            // load imgPad1[j]
+    add r9, r9, #2
+    add r10, r10, #2
+    vld1.64 {q14}, [r11]            // load imgPad2[j-1]
+    vld1.64 {q15}, [r12]            // load imgPad1[j-1]
+    vmovn.i16 d22, q12
+    vmovn.i16 d23, q13
+    vmovn.i16 d24, q14
+    vmovn.i16 d25, q15
+
+    vld1.64 {q14}, [r9]             // load imgPad2[j+1]
+    vld1.64 {q15}, [r10]            // load imgPad1[j+1]
+    vmovn.i16 d26, q14
+    vmovn.i16 d27, q15
+
+    add r11, r2, r6
+    sub r11, r11, #6
+
+    vaddl.u8 q11, d22, d23          // imgPad2[j] + imgPad1[j]
+    vaddl.u8 q14, d27, d24          // imgPad1[j+1] + imgPad2[j-1]
+    vaddl.u8 q15, d26, d25          // imgPad2[j+1] + imgPad1[j-1]
+
+    vld1.64 {q12, q13}, [r11]       // load imgPad[j-3]
+
+    vmla.s16 q10, q14, d0[2]        // pixelInt += coef[2] * (imgPad1[j + 1] + imgPad2[j - 1])
+    vmla.s16 q10, q11, d0[3]        // pixelInt += coef[3] * (imgPad1[j] + imgPad2[j])
+    vmla.s16 q10, q15, d1[0]        // pixelInt += coef[4] * (imgPad1[j - 1] + imgPad2[j + 1])
+
+    vmovn.i16 d24, q12
+    vmovn.i16 d25, q13
+
+    vext.8 d26, d24, d25, #1        // imgPad[j-2]
+    vext.8 d27, d24, d25, #2        // imgPad[j-1]
+    vext.8 d28, d24, d25, #3        // imgPad[j]
+    vext.8 d29, d24, d25, #4        // imgPad[j+1]
+    vext.8 d30, d24, d25, #5        // imgPad[j+2]
+    vext.8 d31, d24, d25, #6        // imgPad[j+3]
+
+    vaddl.u8 q8, d24, d31           // imgPad[j+3] + imgPad[j-3]
+    vaddl.u8 q9, d26, d30           // imgPad[j+2] + imgPad[j-2]
+    vaddl.u8 q11, d27, d29          // imgPad[j+1] + imgPad[j-1]
+    vmovl.u8 q12, d28               // imgPad[j]
+
+    vmla.s16 q10, q8, d1[1]         // pixelInt += coef[5] * (imgPad[j + 3] + imgPad[j - 3])
+    vmla.s16 q10, q9, d1[2]         // pixelInt += coef[6] * (imgPad[j + 2] + imgPad[j - 2])
+    vmla.s16 q10, q11, d1[3]        // pixelInt += coef[7] * (imgPad[j + 1] + imgPad[j - 1])
+    vmla.s16 q10, q12, d2[0]        // pixelInt += coef[8] * (imgPad[j])
+
+    add   r9, r0, r6
+
+    vqrshrun.s16 d20, q10, #6
+    vld1.8 {q11}, [r9]
+    vmovl.u8 q10, d20
+    vbif  q10, q11, q3
+
+    add   r6, r6, #16
+    vst1.8 {q10}, [r9]             // store imgRes[j]
+
+    cmp   r6, r4
+    blt   alf_one_chroma_loop_x
+
+    add   r8, r8, #1
+    add   r0, r0, r1
+    add   r2, r2, r3
+    cmp   r8, r5
+    blt   alf_one_chroma_loop_y
+
+	ldmia sp!, {r4-r12, pc}
+
+#else
 
 /*********************************************************************************************************************************************
  *  void uavs3d_alf_one_lcu_armv7(pel *dst, int i_dst, pel *src, int i_src, int lcu_width, int lcu_height, int *coef, int sample_bit_depth);
