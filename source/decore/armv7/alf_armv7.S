@@ -931,6 +931,7 @@ alf_one_chroma_loop_x:
 
     vpop {q4}
     ldmia sp!, {r4-r12, pc}
+#endif
 
 #else // 10BIT
 
