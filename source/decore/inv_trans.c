@@ -20,7 +20,7 @@
 
 /******************   DCT-2   ******************************************/
 
-static uavs3d_always_inline void dct_butterfly_h4(s16* src, s16* dst, int line, int shift, int bit_depth) {
+static uavs3d_inline void dct_butterfly_h4(s16* src, s16* dst, int line, int shift, int bit_depth) {
     int j;
     int E[2], O[2];
     int add = 1 << (shift - 1);
@@ -46,7 +46,7 @@ static uavs3d_always_inline void dct_butterfly_h4(s16* src, s16* dst, int line, 
 
 }
 
-static uavs3d_always_inline void dct_butterfly_h8(s16* src, int i_src, s16* dst, int line, int shift, int bit_depth) {
+static uavs3d_inline void dct_butterfly_h8(s16* src, int i_src, s16* dst, int line, int shift, int bit_depth) {
     int j, k;
     int E[4], O[4];
     int EE[2], EO[2];
@@ -82,7 +82,7 @@ static uavs3d_always_inline void dct_butterfly_h8(s16* src, int i_src, s16* dst,
 
 }
 
-static uavs3d_always_inline void dct_butterfly_h16(s16 *src, int i_src, s16 *dst, int line, int shift, int bit_depth)
+static uavs3d_inline void dct_butterfly_h16(s16 *src, int i_src, s16 *dst, int line, int shift, int bit_depth)
 {
     int j, k;
     int E[8], O[8];
@@ -132,7 +132,7 @@ static uavs3d_always_inline void dct_butterfly_h16(s16 *src, int i_src, s16 *dst
 #undef DCT_COEFFS
 }
 
-static uavs3d_always_inline void dct_butterfly_h32(s16 *src, int i_src, s16 *dst, int line, int shift, int bit_depth)
+static uavs3d_inline void dct_butterfly_h32(s16 *src, int i_src, s16 *dst, int line, int shift, int bit_depth)
 {
     int j, k;
     int E[16], O[16];
@@ -209,7 +209,7 @@ static uavs3d_always_inline void dct_butterfly_h32(s16 *src, int i_src, s16 *dst
 #undef DCT_COEFFS
 }
 
-static uavs3d_always_inline void dct_butterfly_h64(s16 *src, int i_src, s16 *dst, int line, int shift, int bit_depth)
+static uavs3d_inline void dct_butterfly_h64(s16 *src, int i_src, s16 *dst, int line, int shift, int bit_depth)
 {
     const int tx_size = 64;
     int j, k;
