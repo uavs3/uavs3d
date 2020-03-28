@@ -324,7 +324,7 @@ void uavs3d_funs_init_armv7()
     uavs3d_funs_handle.padding_rows_luma = uavs3d_padding_rows_luma_armv7;
     uavs3d_funs_handle.padding_rows_chroma = uavs3d_padding_rows_chroma_armv7;
 	
-	uavs3d_funs_handle.intra_pred_ver  [ Y_C] = uavs3d_intra_pred_ver_armv7;
+    uavs3d_funs_handle.intra_pred_ver  [ Y_C] = uavs3d_intra_pred_ver_armv7;
     uavs3d_funs_handle.intra_pred_hor  [ Y_C] = uavs3d_intra_pred_hor_armv7;
     uavs3d_funs_handle.intra_pred_dc   [ Y_C] = uavs3d_intra_pred_dc_armv7;
     uavs3d_funs_handle.intra_pred_plane[ Y_C] = uavs3d_intra_pred_plane_armv7;

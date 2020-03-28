@@ -27,10 +27,10 @@
 //r7->transform block, 8bit
 //*************************************************************************************************
 function uavs3d_itrans_dct8_pb4_armv7
-    push {r4-r8, lr}
-    add sp, sp, #24
+    push {r4-r10, lr}
+    add sp, sp, #32
     ldmia sp, {r4, r5, r6, r7}
-    sub sp, sp, #24
+    sub sp, sp, #32
     vpush {q4-q7}
 
     neg r8, r2
@@ -91,10 +91,8 @@ dct8_pb4_armv7_store:
     cmp r4, r3
     blo dct8_pb4_armv7_loopi
 
-
     vpop {q4-q7}
-    pop  {r4-r8, lr}
-    mov  pc, lr
+    pop  {r4-r10, pc}
 
 
 //*************************************************************************************************
@@ -104,10 +102,10 @@ dct8_pb4_armv7_store:
 //r7->transform block, 8bit
 //*************************************************************************************************
 function uavs3d_itrans_dct8_pb8_armv7
-    push {r4-r8, lr}
-    add sp, sp, #24
+    push {r4-r10, lr}
+    add sp, sp, #32
     ldmia sp, {r4, r5, r6, r7}
-    sub sp, sp, #24
+    sub sp, sp, #32
     vpush {q4-q7}
 
     neg r8, r2
@@ -189,7 +187,7 @@ dct8_pb8_armv7_store:
     blo dct8_pb8_armv7_loopi
 
     vpop {q4-q7}
-    pop  {r4-r8, lr}
+    pop  {r4-r10, pc}
 
 
 //*************************************************************************************************
@@ -199,10 +197,10 @@ dct8_pb8_armv7_store:
 //r7->transform block, 8bit
 //*************************************************************************************************
 function uavs3d_itrans_dct8_pb16_armv7
-    push {r4-r8, lr}
-    add sp, sp, #24
+    push {r4-r10, lr}
+    add sp, sp, #32
     ldmia sp, {r4, r5, r6, r7}
-    sub sp, sp, #24
+    sub sp, sp, #32
     vpush {q4-q7}
 
     neg r8, r2
@@ -284,8 +282,7 @@ dct8_pb16_armv7_store:
     blo dct8_pb16_armv7_loopi
 
     vpop {q4-q7}
-    pop  {r4-r8, lr}
-    mov  pc, lr
+    pop  {r4-r10, pc}
 
 
 //*************************************************************************************************
@@ -295,10 +292,10 @@ dct8_pb16_armv7_store:
 //r7->transform block, 8bit
 //*************************************************************************************************
 function uavs3d_itrans_dst7_pb4_armv7
-    push {r4-r8, lr}
-    add sp, sp, #24
+    push {r4-r10, lr}
+    add sp, sp, #32
     ldmia sp, {r4, r5, r6, r7}
-    sub sp, sp, #24
+    sub sp, sp, #32
     vpush {q4-q7}
 
     neg r8, r2
@@ -354,14 +351,13 @@ dst7_pb4_armv7_shift12:
 
 dst7_pb4_armv7_store:
     vst1.64 d8, [r1]
-    add r1, r1,#8
+    add r1, r1, #8
     add r4, r4, #2
     cmp r4, r3
     blo dst7_pb4_armv7_loopi
 
     vpop {q4-q7}
-    pop  {r4-r8, lr}
-    mov  pc, lr
+    pop  {r4-r10, pc}
 
 
 //*************************************************************************************************
@@ -371,10 +367,10 @@ dst7_pb4_armv7_store:
 //r7->transform block, 8bit
 //*************************************************************************************************
 function uavs3d_itrans_dst7_pb8_armv7
-    push {r4-r8, lr}
-    add sp, sp, #24
+    push {r4-r10, lr}
+    add sp, sp, #32
     ldmia sp, {r4, r5, r6, r7}
-    sub sp, sp, #24
+    sub sp, sp, #32
     vpush {q4-q7}
 
     neg r8, r2
@@ -456,8 +452,7 @@ dst7_pb8_armv7_store:
     blo dct8_pb8_armv7_loopi
 
     vpop {q4-q7}
-    pop  {r4-r8, lr}
-    mov  pc, lr
+    pop  {r4-r10, pc}
 
 
 //*************************************************************************************************
@@ -467,10 +462,10 @@ dst7_pb8_armv7_store:
 //r7->transform block, 8bit
 //*************************************************************************************************
 function uavs3d_itrans_dst7_pb16_armv7
-    push {r4-r8, lr}
-    add sp, sp, #24
+    push {r4-r10, lr}
+    add sp, sp, #32
     ldmia sp, {r4, r5, r6, r7}
-    sub sp, sp, #24
+    sub sp, sp, #32
     vpush {q4-q7}
 
     neg r8, r2
@@ -552,7 +547,6 @@ dst7_pb16_armv7_store:
     blo dst7_pb16_armv7_loopi
 
     vpop {q4-q7}
-    pop  {r4-r8, lr}
-    mov  pc, lr
+    pop  {r4-r10, pc}
 
 #endif
