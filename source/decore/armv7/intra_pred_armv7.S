@@ -24,26 +24,26 @@
 //src->r0, dst->r1, i_dst->r2, width->r3, height->r4
 function uavs3d_intra_pred_ver_armv7
     //branch
-    push {r4-r5, lr}
-    ldr r4, [sp, #12]
+    cmp r3, #4
+    ldr ip, [sp, #0]
+    beq intra_pred_ver_w4
 
-    //branch
     cmp r3, #16
+    blt intra_pred_ver_w8
+    vld1.64 {d0, d1}, [r0]!
     beq intra_pred_ver_w16
-    bgt intra_pred_ver_w32x
+    vld1.64 {d2, d3}, [r0]!
+    b intra_pred_ver_w32x
 
-    cmp r3, #8
-    beq intra_pred_ver_w8
+intra_pred_ver_w4:
 
-    //intra_pred_ver_w4:
-
-    ldr r5, [r0]  //load src[x]
-    intra_pred_ver_w4_y:
-    str r5, [r1], r2
-    str r5, [r1], r2
-    str r5, [r1], r2
-    str r5, [r1], r2
-    subs r4, r4, #4
+    ldr r3, [r0]  //load src[x]
+intra_pred_ver_w4_y:
+    str r3, [r1], r2
+    str r3, [r1], r2
+    str r3, [r1], r2
+    str r3, [r1], r2
+    subs ip, ip, #4
     bgt intra_pred_ver_w4_y
 
     b intra_pred_ver_end
@@ -53,7 +53,7 @@ intra_pred_ver_w8:
 intra_pred_ver_w8_y:
     vst1.32 {d0}, [r1], r2
     vst1.32 {d0}, [r1], r2
-    subs r4, r4, #4
+    subs ip, ip, #4
     vst1.32 {d0}, [r1], r2
     vst1.32 {d0}, [r1], r2
     bgt intra_pred_ver_w8_y
@@ -61,11 +61,10 @@ intra_pred_ver_w8_y:
     b intra_pred_ver_end
 
 intra_pred_ver_w16:
-    vld1.64 {d0, d1}, [r0]
 intra_pred_ver_w16_y:
     vst1.64 {d0, d1}, [r1], r2
     vst1.64 {d0, d1}, [r1], r2
-    subs r4, r4, #4
+    subs ip, ip, #4
     vst1.64 {d0, d1}, [r1], r2
     vst1.64 {d0, d1}, [r1], r2
     bgt intra_pred_ver_w16_y
@@ -78,11 +77,10 @@ intra_pred_ver_w32x:
     bgt intra_pred_ver_w128
 
 intra_pred_ver_w32:
-    vld1.64 {q0, q1}, [r0]
 intra_pred_ver_w32_y:
     vst1.64 {q0, q1}, [r1], r2
     vst1.64 {q0, q1}, [r1], r2
-    subs r4, r4, #4
+    subs ip, ip, #4
     vst1.64 {q0, q1}, [r1], r2
     vst1.64 {q0, q1}, [r1], r2
     bgt intra_pred_ver_w32_y
@@ -90,15 +88,14 @@ intra_pred_ver_w32_y:
     b intra_pred_ver_end
 
 intra_pred_ver_w64:
-    sub r2, r2, #32
-    vld1.64 {q0, q1}, [r0]!
     vld1.64 {q2, q3}, [r0]
+    sub r2, r2, #32
 intra_pred_ver_w64_y:
     vst1.64 {q0, q1}, [r1]!
     vst1.64 {q2, q3}, [r1], r2
     vst1.64 {q0, q1}, [r1]!
     vst1.64 {q2, q3}, [r1], r2
-    subs r4, r4, #4
+    subs ip, ip, #4
     vst1.64 {q0, q1}, [r1]!
     vst1.64 {q2, q3}, [r1], r2
     vst1.64 {q0, q1}, [r1]!
@@ -107,12 +104,12 @@ intra_pred_ver_w64_y:
     b intra_pred_ver_end
 
 intra_pred_ver_w128:
-    sub r2, r2, #96
-    vld1.64 {q0, q1}, [r0]!
     vld1.64 {q2, q3}, [r0]!
     vld1.64 {q12, q13}, [r0]!
     vld1.64 {q14, q15}, [r0]
+    sub r2, r2, #96
 intra_pred_ver_w128_y:
+    @ TODO: vstmia when [r1] is aligned
     vst1.64 {q0, q1}, [r1]!
     vst1.64 {q2, q3}, [r1]!
     vst1.64 {q12, q13}, [r1]!
@@ -125,7 +122,7 @@ intra_pred_ver_w128_y:
     vst1.64 {q2, q3}, [r1]!
     vst1.64 {q12, q13}, [r1]!
     vst1.64 {q14, q15}, [r1], r2
-    subs r4, r4, #8
+    subs ip, ip, #8
     vst1.64 {q0, q1}, [r1]!
     vst1.64 {q2, q3}, [r1]!
     vst1.64 {q12, q13}, [r1]!
@@ -133,7 +130,7 @@ intra_pred_ver_w128_y:
     bgt intra_pred_ver_w128_y
 
 intra_pred_ver_end:
-    pop {r4-r5, pc}
+    bx lr
 
 
 //void uavs3d_intra_pred_hor_armv7(pel *src, pel *dst, int i_dst, int width, int height)
