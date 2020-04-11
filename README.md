@@ -1,4 +1,4 @@
-# uavs3d
+﻿# uavs3d
  uavs3d is an opensource and cross-platform avs3 decoder, supports AVS3-P2 baseline profile. <br>
  features:
  1) AVS3-P2 baseline profile.
@@ -89,4 +89,6 @@ This program is originally developed by the team of Prof.Ronggang Wang (rgwang@p
   * Xufeng Li, Peking University Shenzhen Graduate School. 
   * Yangang Cai, Peking University Shenzhen Graduate School. 
   * Hao Lv, Peng Cheng Laboratory. 
-  * Ronggang Wang (rgwang@pkusz.edu.cn), Peking University Shenzhen Graduate School
+  * Min Chen.
+  
+  ** Ronggang Wang (rgwang@pkusz.edu.cn), Peking University Shenzhen Graduate School
