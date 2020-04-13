@@ -434,108 +434,6 @@ void uavs3d_ipred_ang_x_avx2(pel *src, pel *dst, int i_dst, int mode, int width,
             dst += i_dst;
         }
     }
-    else if (width == 12) {
-        __m128i off = _mm_set1_epi16(64);
-        __m256i mSwitch = _mm256_setr_epi8(0, 1, 2, 3, 1, 2, 3, 4, 2, 3, 4, 5, 3, 4, 5, 6, 0, 1, 2, 3, 1, 2, 3, 4, 2, 3, 4, 5, 3, 4, 5, 6);
-        int j, i;
-        for (j = 0; j < height; j++) {
-            int idx = uavs3d_ipred_steps[mode - 3][0][j];
-            int offset = uavs3d_ipred_offsets[mode - 3][0][j];
-            pel *psrc = src + idx;
-            int c0 = 32 - offset;
-            int c1 = 64 - offset;
-            int c2 = 32 + offset;
-            int c3 = offset;
-            int pred_width = COM_MIN(12, 24 - idx + 1);
-
-            if (pred_width <= 0) {
-                dst[0] = (src[24] * c0 + src[24 + 1] * c1 + src[24 + 2] * c2 + src[24 + 3] * c3 + 64) >> 7;
-                pred_width = 1;
-            }
-            else {
-                int coef = ((c3 << 24)) | (c2 << 16) | (c1 << 8) | c0;
-                __m256i C = _mm256_set1_epi32(coef);
-                __m256i mSrc, T;
-                __m128i m0, m1;
-
-                mSrc = _mm256_set_m128i(_mm_loadl_epi64((__m128i*)(psrc + 4)), _mm_loadl_epi64((__m128i*)(psrc)));
-
-                T = _mm256_shuffle_epi8(mSrc, mSwitch);
-                T = _mm256_maddubs_epi16(T, C);
-                m0 = _mm256_castsi256_si128(T);
-                m1 = _mm256_extracti128_si256(T, 1);
-                m0 = _mm_hadd_epi16(m0, m1);
-                m0 = _mm_add_epi16(m0, off);
-                m0 = _mm_srai_epi16(m0, 7);
-                m0 = _mm_packus_epi16(m0, m0);
-                idx += 8;
-                _mm_storel_epi64((__m128i*)dst, m0);
-
-                for (i = 8; i < pred_width; i++, idx++) {
-                    dst[i] = (src[idx] * c0 + src[idx + 1] * c1 + src[idx + 2] * c2 + src[idx + 3] * c3 + 64) >> 7;
-                }
-            }
-            for (i = pred_width; i < width; i++) {
-                dst[i] = dst[pred_width - 1];
-            }
-            dst += i_dst;
-        }
-
-    }
-    else if (width == 24) {
-        __m256i off = _mm256_set1_epi16(64);
-        __m256i mSwitch0 = _mm256_setr_epi8(0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8);
-        __m256i mSwitch1 = _mm256_setr_epi8(2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10);
-        int j, i;
-        for (j = 0; j < height; j++) {
-            int idx = uavs3d_ipred_steps[mode - 3][0][j];
-            int offset = uavs3d_ipred_offsets[mode - 3][0][j];
-            pel *psrc = src + idx;
-            int c0 = 32 - offset;
-            int c1 = 64 - offset;
-            int c2 = 32 + offset;
-            int c3 = offset;
-            int pred_width = COM_MIN(24, 48 - idx + 1);
-            if (pred_width <= 0) {
-                dst[0] = (src[48] * c0 + src[48 + 1] * c1 + src[48 + 2] * c2 + src[48 + 3] * c3 + 64) >> 7;
-                pred_width = 1;
-            }
-            else {
-                __m256i C0 = _mm256_set1_epi16((c1 << 8) | c0);
-                __m256i C1 = _mm256_set1_epi16((c3 << 8) | c2);
-                __m256i mSrc0, mSrc1;
-                __m256i T0, T1, T2, T3;
-
-                mSrc0 = _mm256_set_m128i(_mm_loadu_si128((__m128i*)(psrc + 8)), _mm_loadu_si128((__m128i*)(psrc)));
-                mSrc1 = _mm256_set_m128i(_mm_setzero_si128(), _mm_loadu_si128((__m128i*)(psrc + 16)));
-
-                T0 = _mm256_shuffle_epi8(mSrc0, mSwitch0);
-                T1 = _mm256_shuffle_epi8(mSrc0, mSwitch1);
-                T2 = _mm256_shuffle_epi8(mSrc1, mSwitch0);
-                T3 = _mm256_shuffle_epi8(mSrc1, mSwitch1);
-                T0 = _mm256_maddubs_epi16(T0, C0);
-                T1 = _mm256_maddubs_epi16(T1, C1);
-                T2 = _mm256_maddubs_epi16(T2, C0);
-                T3 = _mm256_maddubs_epi16(T3, C1);
-
-                T0 = _mm256_add_epi16(T0, T1);
-                T2 = _mm256_add_epi16(T2, T3);
-                T0 = _mm256_add_epi16(T0, off);
-                T2 = _mm256_add_epi16(T2, off);
-                T0 = _mm256_srai_epi16(T0, 7);
-                T2 = _mm256_srai_epi16(T2, 7);
-                T0 = _mm256_packus_epi16(T0, T2);
-                T0 = _mm256_permute4x64_epi64(T0, 0xd8);
-
-                _mm_storeu_si128((__m128i*)dst, _mm256_castsi256_si128(T0));
-                _mm_storel_epi64((__m128i*)(dst + 16), _mm256_extracti128_si256(T0, 1));
-            }
-            for (i = pred_width; i < width; i++) {
-                dst[i] = dst[pred_width - 1];
-            }
-            dst += i_dst;
-        }
-    }
     else { // x 16
         __m256i off = _mm256_set1_epi16(64);
         __m256i mSwitch0 = _mm256_setr_epi8(0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8);
@@ -705,20 +603,6 @@ void uavs3d_ipred_ang_x_4_avx2(pel *src, pel *dst, int i_dst, int mode, int widt
         }
         break;
     }
-    case 12: {
-        __m128i m0, m1;
-        __m128i mask = _mm_set_epi32(0, -1, -1, -1);
-        int i_dst2 = i_dst << 1;
-        for (i = 0; i < height2; i += 4) {
-            m0 = _mm_loadu_si128((const __m128i*)(first_line + i));
-            m1 = _mm_srli_si128(m0, 2);
-            _mm_maskmoveu_si128(m0, mask, (char*)(dst));
-            _mm_maskmoveu_si128(m1, mask, (char*)(dst + i_dst));
-
-            dst += i_dst2;
-        }
-        break;
-    }
     case 16: {
         __m128i m0, m1, m2, m3;
         int i_dst2 = i_dst << 1;
@@ -738,24 +622,6 @@ void uavs3d_ipred_ang_x_4_avx2(pel *src, pel *dst, int i_dst, int mode, int widt
         }
         break;
     }
-    case 24: {
-        __m128i m0, m1, m2, m3;
-        int i_dst2 = i_dst << 1;
-        pel* psrc = first_line;
-        for (i = 0; i < height2; i += 4) {
-            m0 = _mm_loadu_si128((const __m128i*)(psrc));
-            m1 = _mm_loadu_si128((const __m128i*)(psrc + 16));
-            m2 = _mm_loadu_si128((const __m128i*)(psrc + 2));
-            m3 = _mm_loadu_si128((const __m128i*)(psrc + 18));
-            _mm_storeu_si128((__m128i*)(dst), m0);
-            _mm_storel_epi64((__m128i*)(dst + 16), m1);
-            _mm_storeu_si128((__m128i*)(dst + i_dst), m2);
-            _mm_storel_epi64((__m128i*)(dst + i_dst + 16), m3);
-            psrc += 4;
-            dst += i_dst2;
-        }
-        break;
-    }
     case 32: {
         __m256i m0, m1, m2, m3;
         int i_dst2 = i_dst << 1;
@@ -770,34 +636,6 @@ void uavs3d_ipred_ang_x_4_avx2(pel *src, pel *dst, int i_dst, int mode, int widt
             _mm256_storeu_si256((__m256i*)(dst + i_dst), m1);
             _mm256_storeu_si256((__m256i*)(dst + i_dst2), m2);
             _mm256_storeu_si256((__m256i*)(dst + i_dst3), m3);
-            psrc += 8;
-            dst += i_dst << 2;
-        }
-        break;
-    }
-    case 48: {
-        __m256i m0, m1, m2, m3;
-        __m128i s0, s1, s2, s3;
-        int i_dst2 = i_dst << 1;
-        int i_dst3 = i_dst + i_dst2;
-        pel* psrc = first_line;
-        for (i = 0; i < height2; i += 8) {
-            m0 = _mm256_loadu_si256((const __m256i*)(psrc));
-            m1 = _mm256_loadu_si256((const __m256i*)(psrc + 2));
-            m2 = _mm256_loadu_si256((const __m256i*)(psrc + 4));
-            m3 = _mm256_loadu_si256((const __m256i*)(psrc + 6));
-            s0 = _mm_loadu_si128((const __m128i*)(psrc + 32));
-            s1 = _mm_loadu_si128((const __m128i*)(psrc + 34));
-            s2 = _mm_loadu_si128((const __m128i*)(psrc + 36));
-            s3 = _mm_loadu_si128((const __m128i*)(psrc + 38));
-            _mm256_storeu_si256((__m256i*)(dst), m0);
-            _mm_storeu_si128((__m128i*)(dst + 32), s0);
-            _mm256_storeu_si256((__m256i*)(dst + i_dst), m1);
-            _mm_storeu_si128((__m128i*)(dst + 32 + i_dst), s1);
-            _mm256_storeu_si256((__m256i*)(dst + i_dst2), m2);
-            _mm_storeu_si128((__m128i*)(dst + 32 + i_dst2), s2);
-            _mm256_storeu_si256((__m256i*)(dst + i_dst3), m3);
-            _mm_storeu_si128((__m128i*)(dst + 32 + i_dst3), s3);
             psrc += 8;
             dst += i_dst << 2;
         }
@@ -908,20 +746,11 @@ void uavs3d_ipred_ang_x_6_avx2(pel *src, pel *dst, int i_dst, int mode, int widt
     case 8:
         COPY_X6(8)
             break;
-    case 12:
-        COPY_X6(12)
-            break;
     case 16:
         COPY_X6(16)
             break;
-    case 24:
-        COPY_X6(24)
-            break;
     case 32:
         COPY_X6(32)
-            break;
-    case 48:
-        COPY_X6(48)
             break;
     case 64:
         COPY_X6(64)
@@ -1096,24 +925,6 @@ void uavs3d_ipred_ang_x_8_avx2(pel *src, pel *dst, int i_dst, int mode, int widt
         }
         break;
     }
-    case 12: {
-        __m128i m0, m1, m2, m3;
-        __m128i mask = _mm_set_epi32(0, -1, -1, -1);
-        int i_dst3 = i_dst + i_dst2;
-        for (i = 0; i < height; i += 2) {
-            m0 = _mm_loadu_si128((const __m128i*)(pfirst[0] + i));
-            m1 = _mm_loadu_si128((const __m128i*)(pfirst[1] + i));
-            m2 = _mm_srli_si128(m0, 1);
-            m3 = _mm_srli_si128(m1, 1);
-            _mm_maskmoveu_si128(m0, mask, (char*)(dst));
-            _mm_maskmoveu_si128(m1, mask, (char*)(dst + i_dst));
-            _mm_maskmoveu_si128(m2, mask, (char*)(dst + i_dst2));
-            _mm_maskmoveu_si128(m3, mask, (char*)(dst + i_dst3));
-
-            dst += i_dst << 2;
-        }
-        break;
-    }
     case 16: {
         __m128i m0, m1, m2, m3;
         int i_dst3 = i_dst + i_dst2;
@@ -1131,22 +942,6 @@ void uavs3d_ipred_ang_x_8_avx2(pel *src, pel *dst, int i_dst, int mode, int widt
         }
         break;
     }
-    case 24: {
-        __m128i m0, m1, m2, m3;
-        for (i = 0; i < height; i++) {
-            m0 = _mm_loadu_si128((const __m128i*)(pfirst[0] + i));
-            m1 = _mm_loadu_si128((const __m128i*)(pfirst[1] + i));
-            m2 = _mm_loadl_epi64((const __m128i*)(pfirst[0] + i + 16));
-            m3 = _mm_loadl_epi64((const __m128i*)(pfirst[1] + i + 16));
-            _mm_storeu_si128((__m128i*)(dst), m0);
-            _mm_storel_epi64((__m128i*)(dst + 16), m2);
-            _mm_storeu_si128((__m128i*)(dst + i_dst), m1);
-            _mm_storel_epi64((__m128i*)(dst + i_dst + 16), m3);
-
-            dst += i_dst2;
-        }
-        break;
-    }
     case 32: {
         __m256i m0, m1, m2, m3;
         int i_dst3 = i_dst + i_dst2;
@@ -1159,33 +954,6 @@ void uavs3d_ipred_ang_x_8_avx2(pel *src, pel *dst, int i_dst, int mode, int widt
             _mm256_storeu_si256((__m256i*)(dst + i_dst), m1);
             _mm256_storeu_si256((__m256i*)(dst + i_dst2), m2);
             _mm256_storeu_si256((__m256i*)(dst + i_dst3), m3);
-
-            dst += i_dst << 2;
-        }
-        break;
-    }
-    case 48: {
-        __m256i m0, m1, m2, m3;
-        __m128i s0, s1, s2, s3;
-        int i_dst2 = i_dst << 1;
-        int i_dst3 = i_dst + i_dst2;
-        for (i = 0; i < height; i += 2) {
-            m0 = _mm256_loadu_si256((const __m256i*)(pfirst[0] + i));
-            m1 = _mm256_loadu_si256((const __m256i*)(pfirst[1] + i));
-            m2 = _mm256_loadu_si256((const __m256i*)(pfirst[0] + i + 1));
-            m3 = _mm256_loadu_si256((const __m256i*)(pfirst[1] + i + 1));
-            s0 = _mm_loadu_si128((const __m128i*)(pfirst[0] + i + 32));
-            s1 = _mm_loadu_si128((const __m128i*)(pfirst[1] + i + 32));
-            s2 = _mm_loadu_si128((const __m128i*)(pfirst[0] + i + 33));
-            s3 = _mm_loadu_si128((const __m128i*)(pfirst[1] + i + 33));
-            _mm256_storeu_si256((__m256i*)(dst), m0);
-            _mm_storeu_si128((__m128i*)(dst + 32), s0);
-            _mm256_storeu_si256((__m256i*)(dst + i_dst), m1);
-            _mm_storeu_si128((__m128i*)(dst + 32 + i_dst), s1);
-            _mm256_storeu_si256((__m256i*)(dst + i_dst2), m2);
-            _mm_storeu_si128((__m128i*)(dst + 32 + i_dst2), s2);
-            _mm256_storeu_si256((__m256i*)(dst + i_dst3), m3);
-            _mm_storeu_si128((__m128i*)(dst + 32 + i_dst3), s3);
 
             dst += i_dst << 2;
         }
@@ -1405,9 +1173,6 @@ void uavs3d_ipred_ang_x_10_avx2(pel *src, pel *dst, int i_dst, int mode, int wid
             dst4 += i_dstx4;
         }
         break;
-    case 12:
-        COPY_X10(12)
-            break;
     case 16:
         for (i = 0; i < height; i++) {
             CP128(dst1, pfirst[0] + i);
@@ -1420,14 +1185,8 @@ void uavs3d_ipred_ang_x_10_avx2(pel *src, pel *dst, int i_dst, int mode, int wid
             dst4 += i_dstx4;
         }
         break;
-    case 24:
-        COPY_X10(24)
-            break;
     case 32:
         COPY_X10(32)
-            break;
-    case 48:
-        COPY_X10(48)
             break;
     case 64:
         COPY_X10(64)
@@ -1519,17 +1278,6 @@ void uavs3d_ipred_ang_y_avx2(pel *src, pel *dst, int i_dst, int mode, int width,
             *(int*)p = _mm_extract_epi32(T1, 3);
         }
     }
-    else if (height == 12) {
-        for (int i = 0; i < width; i++) {
-            int offset = poffsets[i];
-            pel *p = src - psteps[i];
-
-            for (int j = 0; j < height; j++, p--) {
-                dst[j*i_dst] = (p[0] * (32 - offset) + p[-1] * (64 - offset) + p[-2] * (32 + offset) + p[-3] * offset + 64) >> 7;
-            }
-            dst++;
-        }
-    }
     else { // height == 8x
         __m256i mOffset = _mm256_set1_epi16(64);
         if (width == 4) {
@@ -1596,17 +1344,6 @@ void uavs3d_ipred_ang_y_avx2(pel *src, pel *dst, int i_dst, int mode, int width,
                 p2 -= 8;
                 p3 -= 8;
                 p4 -= 8;
-            }
-        }
-        else if (width == 12) {
-            for (int i = 0; i < width; i++) {
-                u8 offset;
-                pel *p = src - get_context_pixel(mode, 1, i + 1, &offset);
-
-                for (int j = 0; j < height; j++, p--) {
-                    dst[j*i_dst] = (p[0] * (32 - offset) + p[-1] * (64 - offset) + p[-2] * (32 + offset) + p[-3] * offset + 64) >> 7;
-                }
-                dst++;
             }
         }
         else { // width == 8x && height == 8x
@@ -2030,20 +1767,11 @@ void uavs3d_ipred_ang_y_28_avx2(pel *src, pel *dst, int i_dst, int mode, int wid
     case 8:
         COPY_Y28(8)
             break;
-    case 12:
-        COPY_Y28(12)
-            break;
     case 16:
         COPY_Y28(16)
             break;
-    case 24:
-        COPY_Y28(24)
-            break;
     case 32:
         COPY_Y28(32)
-            break;
-    case 48:
-        COPY_Y28(48)
             break;
     case 64:
         COPY_Y28(64)
@@ -2131,20 +1859,11 @@ void uavs3d_ipred_ang_y_30_avx2(pel *src, pel *dst, int i_dst, int mode, int wid
     case 8:
         COPY_Y30(8)
             break;
-    case 12:
-        COPY_Y30(12)
-            break;
     case 16:
         COPY_Y30(16)
             break;
-    case 24:
-        COPY_Y30(24)
-            break;
     case 32:
         COPY_Y30(32)
-            break;
-    case 48:
-        COPY_Y30(48)
             break;
     case 64:
         COPY_Y30(64)
@@ -2246,20 +1965,11 @@ void uavs3d_ipred_ang_y_32_avx2(pel *src, pel *dst, int i_dst, int mode, int wid
     case 8:
         COPY_Y32(8)
             break;
-    case 12:
-        COPY_Y32(12)
-            break;
     case 16:
         COPY_Y32(16)
             break;
-    case 24:
-        COPY_Y32(24)
-            break;
     case 32:
         COPY_Y32(32)
-            break;
-    case 48:
-        COPY_Y32(48)
             break;
     case 64:
         COPY_Y32(64)
@@ -2598,9 +2308,6 @@ void uavs3d_ipred_ang_xy_14_avx2(pel *src, pel *dst, int i_dst, int mode, int wi
             dst += i_dst;
         }
         break;
-    case 12:
-        COPY_XY14(12)
-            break;
     case 16:
         for (i = 0; i < height; i++) {
             CP128(dst, pfirst[0] - i);
@@ -2613,14 +2320,8 @@ void uavs3d_ipred_ang_xy_14_avx2(pel *src, pel *dst, int i_dst, int mode, int wi
             dst += i_dst;
         }
         break;
-    case 24:
-        COPY_XY14(24)
-            break;
     case 32:
         COPY_XY14(32)
-            break;
-    case 48:
-        COPY_XY14(48)
             break;
     case 64:
         COPY_XY14(64)
@@ -2657,7 +2358,7 @@ void uavs3d_ipred_ang_xy_15_avx2(pel *src, pel *dst, int i_dst, int mode, int wi
         dst += i_dst;
     }
 
-    if (width < 12) {
+    if (width <= 8) {
         for (; j < height; j++, d += 93) {
             int step1_width = (int)(((j + 1) << 2) / 11.0 + 0.9999) - 1;
             int offsetx = (d >> 3) & 0x1f;
@@ -2844,20 +2545,11 @@ void uavs3d_ipred_ang_xy_16_avx2(pel *src, pel *dst, int i_dst, int mode, int wi
     case 8:
         COPY_XY16(8)
             break;
-    case 12:
-        COPY_XY16(12)
-            break;
     case 16:
         COPY_XY16(16)
             break;
-    case 24:
-        COPY_XY16(24)
-            break;
     case 32:
         COPY_XY16(32)
-            break;
-    case 48:
-        COPY_XY16(48)
             break;
     case 64:
         COPY_XY16(64)
@@ -2890,7 +2582,7 @@ void uavs3d_ipred_ang_xy_17_avx2(pel *src, pel *dst, int i_dst, int mode, int wi
         dst += i_dst;
         d += 93;
     }
-    if (width < 12) {
+    if (width <= 8) {
         for (j = 1; j < height; j++, d += 93) {
             int step1_width = (int)(((j + 1) << 3) / 11.0 + 0.9999) - 1;
             int offsetx = (d >> 2) & 0x1f;
@@ -3050,7 +2742,7 @@ void uavs3d_ipred_ang_xy_19_avx2(pel *src, pel *dst, int i_dst, int mode, int wi
 
     step2_height = COM_MIN(step2_height, height);
 
-    if (width < 12) {
+    if (width <= 8) {
         for (j = 0; j < step2_height; j++, d += 11) {
             int step1_width = (int)(((j + 1) << 7) / 93.0 + 0.9999) - 1;
             int offsetx = (d << 2) & 0x1f;
@@ -3273,20 +2965,11 @@ void uavs3d_ipred_ang_xy_20_avx2(pel *src, pel *dst, int i_dst, int mode, int wi
     case 8:
         COPY_XY20(8)
             break;
-    case 12:
-        COPY_XY20(12)
-            break;
     case 16:
         COPY_XY20(16)
             break;
-    case 24:
-        COPY_XY20(24)
-            break;
     case 32:
         COPY_XY20(32)
-            break;
-    case 48:
-        COPY_XY20(48)
             break;
     case 64:
         COPY_XY20(64)
@@ -3587,9 +3270,6 @@ void uavs3d_ipred_ang_xy_22_avx2(pel *src, pel *dst, int i_dst, int mode, int wi
                 pfirst -= 4;
             }
             break;
-        case 12:
-            COPY_XY22(12)
-                break;
         case 16:
             while (height--) {
                 CP128(dst, pfirst);
@@ -3597,14 +3277,8 @@ void uavs3d_ipred_ang_xy_22_avx2(pel *src, pel *dst, int i_dst, int mode, int wi
                 pfirst -= 4;
             }
             break;
-        case 24:
-            COPY_XY22(24)
-                break;
         case 32:
             COPY_XY22(32)
-                break;
-        case 48:
-            COPY_XY22(48)
                 break;
         case 64:
             COPY_XY22(64)
@@ -3738,18 +3412,6 @@ void uavs3d_ipred_ver_avx2(pel *src, pel *dst, int i_dst, int width, int height)
         }
         break;
     }
-    case 12: {
-        __m128i T0;
-        T0 = _mm_loadu_si128((__m128i *)src);
-        for (y = 0; y < height; y += 2) {
-            _mm_storeu_si128((__m128i *)(dst), T0);
-            _mm_storeu_si128((__m128i *)(dst + i_dst), T0);
-            CP64(dst + 8, src + 8);
-            CP64(dst + 8 + i_dst, src + 8);
-            dst += i_dst << 1;
-        }
-        break;
-    }
     case 16: {
         int i_dst2 = i_dst << 1;
         int i_dst3 = i_dst + i_dst2;
@@ -3765,21 +3427,6 @@ void uavs3d_ipred_ver_avx2(pel *src, pel *dst, int i_dst, int width, int height)
         }
         break;
     }
-    case 24: {
-        __m256i T0;
-        __m128i t0;
-        int i_dst2 = i_dst << 1;
-        T0 = _mm256_loadu_si256((__m256i *)(src));
-        t0 = _mm_loadu_si128((__m128i *)(src + 16));
-        for (y = 0; y < height; y += 2) {
-            _mm256_store_si256((__m256i *)(dst), T0);
-            _mm_store_si128((__m128i *)(dst + 16), t0);
-            _mm256_store_si256((__m256i *)(dst + i_dst), T0);
-            _mm_store_si128((__m128i *)(dst + i_dst + 16), t0);
-            dst += i_dst2;
-        }
-        break;
-    }
     case 32: {
         __m256i T0, T1;
         int i_dst2 = i_dst << 1;
@@ -3790,23 +3437,6 @@ void uavs3d_ipred_ver_avx2(pel *src, pel *dst, int i_dst, int width, int height)
             _mm256_store_si256((__m256i *)(dst + 16), T1);
             _mm256_store_si256((__m256i *)(dst + i_dst), T0);
             _mm256_store_si256((__m256i *)(dst + i_dst + 16), T1);
-            dst += i_dst2;
-        }
-        break;
-    }
-    case 48: {
-        __m256i T0, T1, T2;
-        int i_dst2 = i_dst << 1;
-        T0 = _mm256_loadu_si256((__m256i *)(src));
-        T1 = _mm256_loadu_si256((__m256i *)(src + 16));
-        T2 = _mm256_loadu_si256((__m256i *)(src + 32));
-        for (y = 0; y < height; y += 2) {
-            _mm256_store_si256((__m256i *)(dst), T0);
-            _mm256_store_si256((__m256i *)(dst + 16), T1);
-            _mm256_store_si256((__m256i *)(dst + 32), T2);
-            _mm256_store_si256((__m256i *)(dst + i_dst), T0);
-            _mm256_store_si256((__m256i *)(dst + i_dst + 16), T1);
-            _mm256_store_si256((__m256i *)(dst + i_dst + 32), T2);
             dst += i_dst2;
         }
         break;
@@ -3872,28 +3502,6 @@ void uavs3d_ipred_hor_avx2(pel *src, pel *dst, int i_dst, int width, int height)
         }
         break;
     }
-    case 12: {
-        __m128i T0, T1, T2, T3;
-        int i_dst2 = i_dst << 1;
-        int i_dst3 = i_dst + i_dst2;
-        int i_dst4 = i_dst << 2;
-        for (y = 0; y < height; y += 4) {
-            T0 = _mm_set1_epi16(src[-y]);
-            T1 = _mm_set1_epi16(src[-y - 1]);
-            T2 = _mm_set1_epi16(src[-y - 2]);
-            T3 = _mm_set1_epi16(src[-y - 3]);
-            _mm_storeu_si128((__m128i *)(dst), T0);
-            _mm_storeu_si128((__m128i *)(dst + i_dst), T1);
-            _mm_storeu_si128((__m128i *)(dst + i_dst2), T2);
-            _mm_storeu_si128((__m128i *)(dst + i_dst3), T3);
-            M64(dst + 8) = _mm_extract_epi64(T0, 0);
-            M64(dst + 8 + i_dst) = _mm_extract_epi64(T1, 0);
-            M64(dst + 8 + i_dst2) = _mm_extract_epi64(T2, 0);
-            M64(dst + 8 + i_dst3) = _mm_extract_epi64(T3, 0);
-            dst += i_dst4;
-        }
-        break;
-    }
     case 16: {
         __m256i T0, T1;
         int i_dst2 = i_dst << 1;
@@ -3906,23 +3514,6 @@ void uavs3d_ipred_hor_avx2(pel *src, pel *dst, int i_dst, int width, int height)
         }
         break;
     }
-    case 24: {
-        __m128i T0, T1;
-        int i_dst2 = i_dst << 1;
-        for (y = 0; y < height; y += 2) {
-            T0 = _mm_set1_epi16(src[-y]);
-            T1 = _mm_set1_epi16(src[-y - 1]);
-            _mm_store_si128((__m128i *)(dst), T0);
-            _mm_store_si128((__m128i *)(dst + 8), T0);
-            _mm_store_si128((__m128i *)(dst + 16), T0);
-            _mm_store_si128((__m128i *)(dst + i_dst), T1);
-            _mm_store_si128((__m128i *)(dst + i_dst + 8), T1);
-            _mm_store_si128((__m128i *)(dst + i_dst + 16), T1);
-            dst += i_dst2;
-        }
-        break;
-    }
-
     case 32: {
         __m256i T0, T1;
         int i_dst2 = i_dst << 1;
@@ -3933,22 +3524,6 @@ void uavs3d_ipred_hor_avx2(pel *src, pel *dst, int i_dst, int width, int height)
             _mm256_store_si256((__m256i *)(dst + 16), T0);
             _mm256_store_si256((__m256i *)(dst + i_dst), T1);
             _mm256_store_si256((__m256i *)(dst + i_dst + 16), T1);
-            dst += i_dst2;
-        }
-        break;
-    }
-    case 48: {
-        __m256i T0, T1;
-        int i_dst2 = i_dst << 1;
-        for (y = 0; y < height; y += 2) {
-            T0 = _mm256_set1_epi16(src[-y]);
-            T1 = _mm256_set1_epi16(src[-y - 1]);
-            _mm256_store_si256((__m256i *)(dst), T0);
-            _mm256_store_si256((__m256i *)(dst + 16), T0);
-            _mm256_store_si256((__m256i *)(dst + 32), T0);
-            _mm256_store_si256((__m256i *)(dst + i_dst), T1);
-            _mm256_store_si256((__m256i *)(dst + i_dst + 16), T1);
-            _mm256_store_si256((__m256i *)(dst + i_dst + 32), T1);
             dst += i_dst2;
         }
         break;
@@ -3987,7 +3562,8 @@ void uavs3d_ipred_dc_avx2(pel *src, pel *dst, int i_dst, int width, int height, 
 
     if (left_avail && above_avail) {
         int length = width + height + 1;
-        __m128i sum = _mm_setzero_si128();
+        __m128i zero = _mm_setzero_si128();
+        __m128i sum = zero;
         __m128i val;
 
         p_src = src - height;
@@ -4003,11 +3579,11 @@ void uavs3d_ipred_dc_avx2(pel *src, pel *dst, int i_dst, int width, int height, 
             val = _mm_and_si128(val, mask);
             sum = _mm_add_epi16(sum, val);
         }
-        sum = _mm_add_epi16(sum, _mm_srli_si128(sum, 8));
-        sum = _mm_add_epi16(sum, _mm_srli_si128(sum, 4));
-        sum = _mm_add_epi16(sum, _mm_srli_si128(sum, 2));
-
-        dc = _mm_extract_epi16(sum, 0) + ((width + height) >> 1) - src[0];
+        val = _mm_unpackhi_epi16(sum, zero);
+        sum = _mm_unpacklo_epi16(sum, zero);
+        sum = _mm_add_epi32(sum, val);
+        sum = _mm_hadd_epi32(sum, sum);
+        dc = _mm_extract_epi32(sum, 0) + _mm_extract_epi32(sum, 1) + ((width + height) >> 1) - src[0];
 
         dc = (dc * (4096 / (width + height))) >> 12;
 
@@ -4082,10 +3658,10 @@ void uavs3d_ipred_dc_avx2(pel *src, pel *dst, int i_dst, int width, int height, 
         int i_dst2 = i_dst << 1;
         __m256i T = _mm256_set1_epi16((s16)dc);
         for (y = 0; y < height; y += 2) {
-            _mm256_store_si256((__m256i *)(dst), T);
-            _mm256_store_si256((__m256i *)(dst + 16), T);
-            _mm256_store_si256((__m256i *)(dst + i_dst), T);
-            _mm256_store_si256((__m256i *)(dst + i_dst + 16), T);
+            _mm256_storeu_si256((__m256i *)(dst), T);
+            _mm256_storeu_si256((__m256i *)(dst + 16), T);
+            _mm256_storeu_si256((__m256i *)(dst + i_dst), T);
+            _mm256_storeu_si256((__m256i *)(dst + i_dst + 16), T);
             dst += i_dst2;
         }
         break;
@@ -4093,10 +3669,10 @@ void uavs3d_ipred_dc_avx2(pel *src, pel *dst, int i_dst, int width, int height, 
     case 64: {
         __m256i T = _mm256_set1_epi16((s16)dc);
         for (y = 0; y < height; y++) {
-            _mm256_store_si256((__m256i *)(dst), T);
-            _mm256_store_si256((__m256i *)(dst + 16), T);
-            _mm256_store_si256((__m256i *)(dst + 32), T);
-            _mm256_store_si256((__m256i *)(dst + 48), T);
+            _mm256_storeu_si256((__m256i *)(dst), T);
+            _mm256_storeu_si256((__m256i *)(dst + 16), T);
+            _mm256_storeu_si256((__m256i *)(dst + 32), T);
+            _mm256_storeu_si256((__m256i *)(dst + 48), T);
             dst += i_dst;
         }
         break;

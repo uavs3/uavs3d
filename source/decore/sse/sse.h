@@ -109,10 +109,16 @@ void uavs3d_ipred_ang_x_9_sse(pel *src, pel *dst, int i_dst, int mode, int width
 void uavs3d_ipred_ang_x_10_sse(pel *src, pel *dst, int i_dst, int mode, int width, int height);
 void uavs3d_ipred_ang_x_11_sse(pel *src, pel *dst, int i_dst, int mode, int width, int height);
 
-void uavs3d_ipred_ang_y_25_sse(pel *src, pel *dst, int i_dst, int mode, int width, int height);
-void uavs3d_ipred_ang_y_27_sse(pel *src, pel *dst, int i_dst, int mode, int width, int height);
-void uavs3d_ipred_ang_y_29_sse(pel *src, pel *dst, int i_dst, int mode, int width, int height);
-void uavs3d_ipred_ang_y_31_sse(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_xy_14_sse(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_xy_16_sse(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_xy_18_sse(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_xy_20_sse(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_xy_22_sse(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+
+void uavs3d_ipred_ang_y_26_sse(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_y_28_sse(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_y_30_sse(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_y_32_sse(pel *src, pel *dst, int i_dst, int mode, int width, int height);
 
 void uavs3d_recon_luma_w4_sse(s16 *resi, pel *pred, int i_pred, int width, int height, pel *rec, int i_rec, int cbf, int bit_depth);
 void uavs3d_recon_luma_w8_sse(s16 *resi, pel *pred, int i_pred, int width, int height, pel *rec, int i_rec, int cbf, int bit_depth);
