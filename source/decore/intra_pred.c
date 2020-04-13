@@ -1161,52 +1161,66 @@ static int uavs3d_always_inline getContextPixel(int uiDirMode, int uiXYflag, int
     return iTempDn;
 }
 
-static void xPredIntraAngAdi_X(pel *pSrc, pel *dst, int i_dst, int uiDirMode, int iWidth, int iHeight)
+static void xPredIntraAngAdi_X(pel *src, pel *dst, int i_dst, int mode, int width, int height)
 {
     int i, j;
     int offset;
-    int iX;
-    int iWidth2 = iWidth << 1;
+    int width2 = width << 1;
 
-    for (j = 0; j < iHeight; j++) {
+    for (j = 0; j < height; j++) {
         int c1, c2, c3, c4;
-        iX = getContextPixel(uiDirMode, 0, j + 1, &offset);
+        int idx = getContextPixel(mode, 0, j + 1, &offset);
+        int pred_width = COM_MIN(width, width2 - idx + 1);
 
         c1 = 32 - offset;
         c2 = 64 - offset;
         c3 = 32 + offset;
         c4 = offset;
 
-        for (i = 0; i < iWidth; i++) {
-            int idx = COM_MIN(iWidth2, iX);
-            dst[i] = (pSrc[idx] * c1 + pSrc[idx + 1] * c2 + pSrc[idx + 2] * c3 + pSrc[idx + 3] * c4 + 64) >> 7;
-            iX++;
+        for (i = 0; i < pred_width; i++, idx++) {
+            dst[i] = (src[idx] * c1 + src[idx + 1] * c2 + src[idx + 2] * c3 + src[idx + 3] * c4 + 64) >> 7;
+        }
+        if (pred_width <= 0) {
+            dst[0] = (src[width2] * c1 + src[width2 + 1] * c2 + src[width2 + 2] * c3 + src[width2 + 3] * c4 + 64) >> 7;
+            pred_width = 1;
+        }
+        for (; i < width; i++) {
+            dst[i] = dst[pred_width - 1];
         }
         dst += i_dst;
     }
 }
 
-static void xPredIntraAngAdiChroma_X(pel *pSrc, pel *dst, int i_dst, int uiDirMode, int iWidth, int iHeight)
+static void xPredIntraAngAdiChroma_X(pel *src, pel *dst, int i_dst, int mode, int width, int height)
 {
     int i, j;
     int offset;
-    int iX;
-    int iWidth2 = iWidth << 1;
+    int width2 = width << 1;
 
-    for (j = 0; j < iHeight; j++) {
+    for (j = 0; j < height; j++) {
         int c1, c2, c3, c4;
-        iX = getContextPixel(uiDirMode, 0, j + 1, &offset);
+        int idx = getContextPixel(mode, 0, j + 1, &offset);
+        int pred_width = (COM_MIN(width, width2 - idx + 1)) << 1;
 
+        idx <<= 1;
         c1 = 32 - offset;
         c2 = 64 - offset;
         c3 = 32 + offset;
         c4 = offset;
 
-        for (i = 0; i < iWidth2; i += 2) {
-            int idx = COM_MIN(iWidth2, iX) << 1;
-            dst[i] = (pSrc[idx] * c1 + pSrc[idx + 2] * c2 + pSrc[idx + 4] * c3 + pSrc[idx + 6] * c4 + 64) >> 7;  //U
-            dst[i + 1] = (pSrc[idx + 1] * c1 + pSrc[idx + 3] * c2 + pSrc[idx + 5] * c3 + pSrc[idx + 7] * c4 + 64) >> 7;  //V
-            iX++;
+        for (i = 0; i < pred_width; i += 2, idx += 2) {
+            dst[i] = (src[idx] * c1 + src[idx + 2] * c2 + src[idx + 4] * c3 + src[idx + 6] * c4 + 64) >> 7;  //U
+            dst[i + 1] = (src[idx + 1] * c1 + src[idx + 3] * c2 + src[idx + 5] * c3 + src[idx + 7] * c4 + 64) >> 7;  //V
+        }
+        if (pred_width <= 0) {
+            idx = width2 << 1;
+            dst[0] = (src[idx] * c1 + src[idx + 2] * c2 + src[idx + 4] * c3 + src[idx + 6] * c4 + 64) >> 7;  //U
+            dst[1] = (src[idx + 1] * c1 + src[idx + 3] * c2 + src[idx + 5] * c3 + src[idx + 7] * c4 + 64) >> 7;  //V
+            pred_width = 2;
+        }
+        for (; i < width2; i += 2) {
+            dst[i] = dst[pred_width - 2];
+            dst[i + 1] = dst[pred_width - 1];
         }
         dst += i_dst;
     }
@@ -1341,7 +1355,7 @@ static void xPredIntraAngAdi_X_10(pel *pSrc, pel *dst, int i_dst, int uiDirMode,
     }
 }
 
-static void xPredIntraAngAdi_Y(pel *pSrc, pel *dst, int i_dst, int uiDirMode, int iWidth, int iHeight)
+static void xPredIntraAngAdi_Y(pel *src, pel *dst, int i_dst, int uiDirMode, int iWidth, int iHeight)
 {
     int i, j;
     int offset;
@@ -1361,7 +1375,7 @@ static void xPredIntraAngAdi_Y(pel *pSrc, pel *dst, int i_dst, int uiDirMode, in
             idx = COM_MAX(-iHeight2, -iY);
 
             offset = offsets[i];
-            dst[i] = (pSrc[idx] * (32 - offset) + pSrc[idx - 1] * (64 - offset) + pSrc[idx - 2] * (32 + offset) + pSrc[idx - 3] * offset + 64) >> 7;
+            dst[i] = (src[idx] * (32 - offset) + src[idx - 1] * (64 - offset) + src[idx - 2] * (32 + offset) + src[idx - 3] * offset + 64) >> 7;
         }
         dst += i_dst;
     }

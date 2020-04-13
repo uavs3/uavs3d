@@ -1,3 +1,20 @@
+/**************************************************************************************
+* Copyright (C) 2018-2019 uavs3d project
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the Open-Intelligence Open Source License V1.1.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* Open-Intelligence Open Source License V1.1 for more details.
+*
+* You should have received a copy of the Open-Intelligence Open Source License V1.1
+* along with this program; if not, you can download it on:
+* http://www.aitisa.org.cn/uploadfile/2018/0910/20180910031548314.pdf
+*
+* For more information, contact us at rgwang@pkusz.edu.cn.
+**************************************************************************************/
 
 #ifndef __UAVS3D_AVX2_H__
 #define __UAVS3D_AVX2_H__
@@ -100,23 +117,6 @@ void uavs3d_avg_pel_w128_avx2(pel *dst, int i_dst, pel *src1, pel *src2, int wid
 
 void uavs3d_padding_rows_luma_avx2(pel *src, int i_src, int width, int height, int start, int rows, int padh, int padv);
 void uavs3d_padding_rows_chroma_avx2(pel *src, int i_src, int width, int height, int start, int rows, int padh, int padv);
-/**************************************************************************************
- * Copyright (C) 2018-2019 uavs3d project
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the Open-Intelligence Open Source License V1.1.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * Open-Intelligence Open Source License V1.1 for more details.
- *
- * You should have received a copy of the Open-Intelligence Open Source License V1.1
- * along with this program; if not, you can download it on:
- * http://www.aitisa.org.cn/uploadfile/2018/0910/20180910031548314.pdf
- *
- * For more information, contact us at rgwang@pkusz.edu.cn.
- **************************************************************************************/
 
 void uavs3d_conv_fmt_8bit_avx2(unsigned char* src_y, unsigned char* src_uv, unsigned char* dst[3], int width, int height, int src_stride, int src_stridec, int dst_stride[3], int uv_shift);
 void uavs3d_conv_fmt_16bit_avx2(unsigned char* src_y, unsigned char* src_uv, unsigned char* dst[3], int width, int height, int src_stride, int src_stridec, int dst_stride[3], int uv_shift);
@@ -125,6 +125,28 @@ void uavs3d_conv_fmt_16to8bit_avx2(unsigned char* src_y, unsigned char* src_uv, 
 void uavs3d_ipred_ver_avx2(pel *src, pel *dst, int i_dst, int width, int height);
 void uavs3d_ipred_hor_avx2(pel *src, pel *dst, int i_dst, int width, int height);
 void uavs3d_ipred_dc_avx2(pel *src, pel *dst, int i_dst, int width, int height, u16 avail_cu, int bit_depth);
+void uavs3d_ipred_ang_x_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_x_4_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_x_6_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_x_8_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_x_10_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_y_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_y_26_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_y_28_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_y_30_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_y_32_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_xy_13_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_xy_14_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_xy_15_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_xy_16_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_xy_17_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_xy_18_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_xy_19_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_xy_20_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_xy_21_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_xy_22_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_ang_xy_23_avx2(pel *src, pel *dst, int i_dst, int mode, int width, int height);
+void uavs3d_ipred_offsets_seteps_init();
 
 void uavs3d_recon_luma_w8_avx2(s16 *resi, pel *pred, int i_pred, int width, int height, pel *rec, int i_rec, int cbf, int bit_depth);
 void uavs3d_recon_luma_w16_avx2(s16 *resi, pel *pred, int i_pred, int width, int height, pel *rec, int i_rec, int cbf, int bit_depth);

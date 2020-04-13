@@ -21,6 +21,7 @@
 #if (BIT_DEPTH == 8)
 void uavs3d_funs_init_avx2()
 {
+    int i;
     uavs3d_funs_handle.ipcpy[3] = uavs3d_if_cpy_w32_avx2;
     uavs3d_funs_handle.ipcpy[4] = uavs3d_if_cpy_w64_avx2;
     uavs3d_funs_handle.ipcpy[5] = uavs3d_if_cpy_w128_avx2;
@@ -83,6 +84,33 @@ void uavs3d_funs_init_avx2()
     uavs3d_funs_handle.intra_pred_ver[Y_C] = uavs3d_ipred_ver_avx2;
     uavs3d_funs_handle.intra_pred_dc [Y_C] = uavs3d_ipred_dc_avx2;
 
+    uavs3d_ipred_offsets_seteps_init();
+    for (i = IPD_BI + 1; i < IPD_VER; i++) {
+        uavs3d_funs_handle.intra_pred_ang[i] = uavs3d_ipred_ang_x_avx2;
+    }
+    for (i = IPD_HOR + 1; i < IPD_CNT - 2; i++) {
+        uavs3d_funs_handle.intra_pred_ang[i] = uavs3d_ipred_ang_y_avx2;
+    }
+    uavs3d_funs_handle.intra_pred_ang[4] = uavs3d_ipred_ang_x_4_avx2;
+    uavs3d_funs_handle.intra_pred_ang[6] = uavs3d_ipred_ang_x_6_avx2;
+    uavs3d_funs_handle.intra_pred_ang[8] = uavs3d_ipred_ang_x_8_avx2;
+    uavs3d_funs_handle.intra_pred_ang[10] = uavs3d_ipred_ang_x_10_avx2;
+    uavs3d_funs_handle.intra_pred_ang[26] = uavs3d_ipred_ang_y_26_avx2;
+    uavs3d_funs_handle.intra_pred_ang[28] = uavs3d_ipred_ang_y_28_avx2;
+    uavs3d_funs_handle.intra_pred_ang[30] = uavs3d_ipred_ang_y_30_avx2;
+    uavs3d_funs_handle.intra_pred_ang[32] = uavs3d_ipred_ang_y_32_avx2;
+    uavs3d_funs_handle.intra_pred_ang[13] = uavs3d_ipred_ang_xy_13_avx2;
+    uavs3d_funs_handle.intra_pred_ang[14] = uavs3d_ipred_ang_xy_14_avx2;
+    uavs3d_funs_handle.intra_pred_ang[15] = uavs3d_ipred_ang_xy_15_avx2;
+    uavs3d_funs_handle.intra_pred_ang[16] = uavs3d_ipred_ang_xy_16_avx2;
+    uavs3d_funs_handle.intra_pred_ang[17] = uavs3d_ipred_ang_xy_17_avx2;
+    uavs3d_funs_handle.intra_pred_ang[18] = uavs3d_ipred_ang_xy_18_avx2;
+    uavs3d_funs_handle.intra_pred_ang[19] = uavs3d_ipred_ang_xy_19_avx2;
+    uavs3d_funs_handle.intra_pred_ang[20] = uavs3d_ipred_ang_xy_20_avx2;
+    uavs3d_funs_handle.intra_pred_ang[21] = uavs3d_ipred_ang_xy_21_avx2;
+    uavs3d_funs_handle.intra_pred_ang[22] = uavs3d_ipred_ang_xy_22_avx2;
+    uavs3d_funs_handle.intra_pred_ang[23] = uavs3d_ipred_ang_xy_23_avx2;
+
     uavs3d_funs_handle.recon_luma[2] = uavs3d_recon_luma_w16_avx2;
     uavs3d_funs_handle.recon_luma[3] = uavs3d_recon_luma_w32_avx2;
     uavs3d_funs_handle.recon_luma[4] = uavs3d_recon_luma_w64_avx2;
@@ -122,12 +150,10 @@ void uavs3d_funs_init_avx2()
     uavs3d_funs_handle.itrans_dct8[0] = itrans_dct8_pb4_avx2;
     uavs3d_funs_handle.itrans_dct8[1] = itrans_dct8_pb8_avx2;
     uavs3d_funs_handle.itrans_dct8[2] = itrans_dct8_pb16_avx2;
-    //uavs3d_funs_handle.itrans_dct8[3] = itrans_dct8_pb32_avx2; //因未被调用，未测试
 
     uavs3d_funs_handle.itrans_dst7[0] = itrans_dst7_pb4_avx2;
     uavs3d_funs_handle.itrans_dst7[1] = itrans_dst7_pb8_avx2;
     uavs3d_funs_handle.itrans_dst7[2] = itrans_dst7_pb16_avx2;
-    //uavs3d_funs_handle.itrans_dst7[3] = itrans_dst7_pb32_avx2;
 }
 
 #else
@@ -224,6 +250,9 @@ void uavs3d_funs_init_avx2()
     uavs3d_funs_handle.alf[UV_C] = uavs3d_alf_one_lcu_chroma_avx2;
     uavs3d_funs_handle.alf[2] = uavs3d_alf_one_lcu_one_chroma_avx2;
 
+    uavs3d_funs_handle.intra_pred_hor[Y_C] = uavs3d_ipred_hor_avx2;
+    uavs3d_funs_handle.intra_pred_ver[Y_C] = uavs3d_ipred_ver_avx2;
+    uavs3d_funs_handle.intra_pred_dc[Y_C] = uavs3d_ipred_dc_avx2;
 }
 
 #endif
