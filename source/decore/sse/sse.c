@@ -415,7 +415,7 @@ void uavs3d_funs_init_sse()
     uavs3d_funs_handle.alf[ Y_C] = uavs3d_alf_one_lcu_sse;
 
     uavs3d_funs_handle.intra_pred_dc[Y_C] = uavs3d_ipred_dc_sse;
-    uavs3d_funs_handle.intra_pred_plane[Y_C] = uavs3d_ipred_plane_sse;
+    //uavs3d_funs_handle.intra_pred_plane[Y_C] = uavs3d_ipred_plane_sse; //bug
     //uavs3d_funs_handle.intra_pred_bi[Y_C] = uavs3d_ipred_bi_sse;  // bug
     uavs3d_funs_handle.intra_pred_hor[Y_C] = uavs3d_ipred_hor_sse;
     uavs3d_funs_handle.intra_pred_ver[Y_C] = uavs3d_ipred_ver_sse;

@@ -438,7 +438,7 @@ void uavs3d_ipred_ang_x_avx2(pel *src, pel *dst, int i_dst, int mode, int width,
         __m256i off = _mm256_set1_epi16(64);
         __m256i mSwitch0 = _mm256_setr_epi8(0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8);
         __m256i mSwitch1 = _mm256_setr_epi8(2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10);
-        int j, i, col;
+        int j, col;
         for (j = 0; j < height; j++) {
             int idx = uavs3d_ipred_steps[mode - 3][0][j];
             int offset = uavs3d_ipred_offsets[mode - 3][0][j];
@@ -478,8 +478,8 @@ void uavs3d_ipred_ang_x_avx2(pel *src, pel *dst, int i_dst, int mode, int width,
                     _mm_storeu_si128((__m128i*)(dst + col), m0);
                 }
             }
-            for (i = pred_width; i < width; i++) {
-                dst[i] = dst[pred_width - 1];
+            for (col = pred_width; col < width; col++) {
+                dst[col] = dst[pred_width - 1];
             }
             dst += i_dst;
         }
