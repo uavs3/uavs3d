@@ -1000,9 +1000,7 @@ int __cdecl uavs3d_flush(void *h, uavs3d_io_frm_t* frm_out)
                 if (ctx->dec_cfg.check_md5 && frm->pichdr.pic_md5_exist) {
                     dec_check_pic_md5(pic, frm->pichdr.pic_md5);
                 }
-                ctx->cur_decoded_dtr = pic->dtr;
                 ctx->output++;
-                break;
             }
         }
     }
