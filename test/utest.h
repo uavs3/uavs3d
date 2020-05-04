@@ -28,13 +28,14 @@
 #include "../source/decoder/uavs3d.h"
 
 /* print function ************************************************************/
-#if defined(__ANDROID__)
-#include <android/log.h>
-#define LOGE(format, ...)  __android_log_print(ANDROID_LOG_ERROR, "(>_<)", format, ##__VA_ARGS__)
-#define LOGI(format, ...)  __android_log_print(ANDROID_LOG_INFO,  "(=_=)", format, ##__VA_ARGS__)
+//#if defined(__ANDROID__)
+//#include <android/log.h>
+//#define LOGE(format, ...)  __android_log_print(ANDROID_LOG_ERROR, "(>_<)", format, ##__VA_ARGS__)
+//#define LOGI(format, ...)  __android_log_print(ANDROID_LOG_INFO,  "(=_=)", format, ##__VA_ARGS__)
 
-#define print(args...) LOGI(args)
-#elif defined(__GNUC__)
+//#define print(args...) LOGI(args)
+//#elif defined(__GNUC__)
+#if defined(__GNUC__)
 #define print(args...) printf(args)
 #else
 #define print(args, ...) printf(args, __VA_ARGS__)
