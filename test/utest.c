@@ -443,6 +443,9 @@ int main(int argc, const char **argv)
     /* parse argv */
     memset(&dec_cfg, 0, sizeof(uavs3d_cfg_t));
 
+    dec_cfg.log_level = 1;
+    dec_cfg.frm_threads = 1;
+
     if (argc % 2 != 1 || argc < 2) {
         log_level_0("Error config, please check arguments: \n");
         print_help();
@@ -462,6 +465,8 @@ int main(int argc, const char **argv)
         print_help();
         return -1;
     }
+
+    log_level_1("bitstream file : %s\n", dec_cfg.input_file);
 
     if(dec_cfg.output_file)
     {

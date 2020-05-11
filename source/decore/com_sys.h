@@ -201,9 +201,10 @@ typedef union uavs3d_union128_t {
 
 #define CP16(dst,src)           M16(dst) = M16(src)
 #define CP32(dst,src)           M32(dst) = M32(src)
-#define CP64(dst,src)           M64(dst) = M64(src)
-#define CP128(dst,src)          M128(dst) = M128(src)
-
+#define CP64(dst,src)           memcpy(dst, src, 8)
+#define CP128(dst,src)          memcpy(dst, src, 16)
+//#define CP64(dst,src)           M64(dst) = M64(src)
+//#define CP128(dst,src)          M128(dst) = M128(src)
 
 /*****************************************************************************
  *  assert
