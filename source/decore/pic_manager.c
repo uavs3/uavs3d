@@ -47,7 +47,7 @@ int com_picman_get_active_refp(com_frm_t *frm, com_pic_manager_t *pm)
         int refPicDoi = (pichdr->decode_order_index - pichdr->rpl_l0.delta_doi[i]);
         int j = 0;
 
-        while (j < pm->cur_pb_size && pm->list[j]->dtr != refPicDoi) j++;
+        while (j < pm->cur_pb_size && (pm->list[j]->dtr != refPicDoi || !pm->list[j]->is_ref)) j++;
 
         if (j < pm->cur_pb_size) {
             set_ref_pic(&refp[i][REFP_0], pm->list[j], pichdr->ptr);

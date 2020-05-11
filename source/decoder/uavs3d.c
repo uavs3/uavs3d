@@ -1086,6 +1086,8 @@ void __cdecl uavs3d_reset(void *h)
         }
         pm->doi_cycles  = 0;
         pm->prev_doi    = 0;
+
+        ctx->output = 0;
     }
 }
 
