@@ -33,9 +33,6 @@
  **************************************************************************************/
 
 #include "dec_type.h"
-#ifdef __ANDROID__
-#include <android/log.h>
-#endif
 
 static void uavs3d_always_inline copy_motion(com_motion_t *motion_dst, s16 mv_new[REFP_NUM][MV_D], s8 refi_new[REFP_NUM])
 {
@@ -1460,11 +1457,7 @@ int dec_check_pic_md5(com_pic_t * pic, u8 md5_buf[16])
     uavs3d_assert_return(!ret, ret);
     
     if (memcmp(md5_buf, pic_md5, 16)) {
-#ifdef __ANDROID__
-        __android_log_print(ANDROID_LOG_ERROR, "(>_<)", " >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  Warnning: enc/dec mismatch! ptr = %lld\n", pic->ptr);
-#else
         printf(" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  Warnning: enc/dec mismatch! ptr = %lld\n", pic->ptr);
-#endif
     }
 
     return RET_OK;

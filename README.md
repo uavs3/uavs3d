@@ -1,4 +1,4 @@
-﻿# uavs3d
+# uavs3d
  uavs3d is an opensource and cross-platform avs3 decoder, supports AVS3-P2 baseline profile. <br>
  features:
  1) AVS3-P2 baseline profile.
@@ -29,13 +29,11 @@ Prerequisites:
   2. CMake (https://cmake.org) version 2.8 or higher
   
 Build:
-  1. ./version.sh
-  2. mkdir build/linux
-  3. cd build/linux && cmake ../..
-  4. make && make install
+  1. mkdir build/linux
+  2. cd build/linux && cmake ../..
+  3. make && make install
 
-  to build shared library, edit source/CMakeLists.txt: <br>
-  add_library(uavs3d SHARED ${DIR_UAVS3D_SRC} ${DIR_X86_256_SRC} ${DIR_X86_SRC})
+  to build shared library, set BUILD_SHARED_LIBS=1 please.
 
 ## ios
 Prerequisites:
