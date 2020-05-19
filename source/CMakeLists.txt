@@ -1,3 +1,6 @@
+
+set(LIBNAME uavs3d)
+
 # add source
 aux_source_directory(./decoder DIR_UAVS3D_SRC)
 aux_source_directory(./decore DIR_UAVS3D_CORE)
@@ -57,7 +60,6 @@ endif()
 file(APPEND "${pc_file}" "Cflags: -I\${includedir}\n")
 
 # set library
-set(LIBNAME uavs3d)
 if(BUILD_SHARED_LIBS)
 MESSAGE(STATUS "BUILD_SHARED_LIBS \t\t: true")
 else()
