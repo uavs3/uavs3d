@@ -519,12 +519,12 @@ void com_sao_lcu_row(com_core_t *core, int lcu_y)
         ll = linel + blk_x_l;
         lc = linec + blk_x_c;
 
-#define FLUSH_LUMA() { \
+#define FLUSH_LUMA() if (isBelowAvail) { \
     memcpy(ll, line_srcl + blk_x_l, (blk_widthl - isRightAvail) * sizeof(pel)); \
     ll[-1] = topleftl; \
     topleftl = line_srcl[blk_x_l + blk_widthl - isRightAvail]; \
 }
-#define FLUSH_CHROMA() { \
+#define FLUSH_CHROMA() if (isBelowAvail) { \
     memcpy(lc, line_srcc + blk_x_c, (blk_widthc - isRightAvail) * sizeof(pel) * 2); \
     lc[- 2] = topleftc[0]; \
     lc[- 1] = topleftc[1]; \
