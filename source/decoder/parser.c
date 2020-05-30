@@ -1977,7 +1977,7 @@ int dec_parse_run_length_cc(com_core_t *core, s16 *coef, int log2_w, int log2_h,
         int ctx_add   = prev_level << 1;
         int run       = dec_parse_run  (lbac, ctx_run + ctx_add);                             /* Run   parsing */
         int abs_level = dec_parse_level(lbac, ctx_lvl + ctx_add) + 1;                         /* Level parsing */
-        int level = lbac_dec_bin_ep_inline(lbac) ? -(s16)abs_level : (s16)abs_level;     /* Sign  parsing */
+        s16 level = lbac_dec_bin_ep_inline(lbac) ? -(s16)abs_level : (s16)abs_level;     /* Sign  parsing */
         int x, y, scan_idx;
 
         scan_pos_offset += run;
