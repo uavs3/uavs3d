@@ -234,12 +234,20 @@ typedef union uavs3d_union128_t {
 #define assert(x) 
 #endif
 
+#ifdef UAVS3D_DEBUG
 #define uavs3d_assert(x) \
     {if(!(x)){assert(0);}}
 #define uavs3d_assert_return(x,r) \
     {if(!(x)){assert(0); return (r);}}
 #define uavs3d_assert_goto(x,g) \
     {if(!(x)){assert(0); goto g;}}
+#else
+#define uavs3d_assert(x)
+#define uavs3d_assert_return(x,r) \
+    {if(!(x)){return (r);}}
+#define uavs3d_assert_goto(x,g) \
+    {if(!(x)){goto g;}}
+#endif
 
 #define com_check_val2(x, v1, v2) {     \
     if (x != v1 && x != v2) {           \
