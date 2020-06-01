@@ -62,35 +62,34 @@ static void seq_free(uavs3d_dec_t * ctx)
     com_free(ctx->frm_nodes_list);
 }
 
-static int seq_init(uavs3d_dec_t * ctx, com_seqh_t * seqhdr)
+static void update_seqhdr(uavs3d_dec_t * ctx, com_seqh_t * seqhdr)
 {
     int size;
-    int ret;
 
     /*** init extension data for com_seqh_t ***/
 
     seqhdr->bit_depth_internal = (seqhdr->encoding_precision == 2) ? 10 : 8;
-    seqhdr->bit_depth_input    = (seqhdr->sample_precision == 1) ? 8 : 10;
+    seqhdr->bit_depth_input = (seqhdr->sample_precision == 1) ? 8 : 10;
     seqhdr->bit_depth_2_qp_offset = (8 * (seqhdr->bit_depth_internal - 8));
 
-    seqhdr->pic_width  = ((seqhdr->horizontal_size + PIC_ALIGN_SIZE - 1) / PIC_ALIGN_SIZE) * PIC_ALIGN_SIZE;
-    seqhdr->pic_height = ((seqhdr->vertical_size   + PIC_ALIGN_SIZE - 1) / PIC_ALIGN_SIZE) * PIC_ALIGN_SIZE;
+    seqhdr->pic_width = ((seqhdr->horizontal_size + PIC_ALIGN_SIZE - 1) / PIC_ALIGN_SIZE) * PIC_ALIGN_SIZE;
+    seqhdr->pic_height = ((seqhdr->vertical_size + PIC_ALIGN_SIZE - 1) / PIC_ALIGN_SIZE) * PIC_ALIGN_SIZE;
 
     seqhdr->max_cuwh = 1 << seqhdr->log2_max_cu_width_height;
     seqhdr->log2_max_cuwh = COM_LOG2(seqhdr->max_cuwh);
 
     size = seqhdr->max_cuwh;
-    seqhdr->pic_width_in_lcu  = (seqhdr->pic_width  + (size - 1)) / size;
+    seqhdr->pic_width_in_lcu = (seqhdr->pic_width + (size - 1)) / size;
     seqhdr->pic_height_in_lcu = (seqhdr->pic_height + (size - 1)) / size;
     seqhdr->f_lcu = seqhdr->pic_width_in_lcu * seqhdr->pic_height_in_lcu;
 
-    seqhdr->pic_width_in_scu  = ((seqhdr->pic_width  + ((1 << MIN_CU_LOG2) - 1)) >> MIN_CU_LOG2);
+    seqhdr->pic_width_in_scu = ((seqhdr->pic_width + ((1 << MIN_CU_LOG2) - 1)) >> MIN_CU_LOG2);
     seqhdr->pic_height_in_scu = ((seqhdr->pic_height + ((1 << MIN_CU_LOG2) - 1)) >> MIN_CU_LOG2);
     seqhdr->i_scu = ((seqhdr->pic_width + ((1 << MIN_CU_LOG2) - 1)) >> MIN_CU_LOG2) + 2;
     seqhdr->f_scu = seqhdr->i_scu * (seqhdr->pic_height_in_scu + 2);
     seqhdr->a_scu = seqhdr->i_scu * (seqhdr->pic_height_in_scu);
 
-    seqhdr->patch_width = seqhdr->pic_width_in_lcu; 
+    seqhdr->patch_width = seqhdr->pic_width_in_lcu;
     seqhdr->patch_height = COM_MIN(seqhdr->patch_height, seqhdr->pic_height_in_lcu);
 
     if (seqhdr->patch_stable) {
@@ -104,7 +103,8 @@ static int seq_init(uavs3d_dec_t * ctx, com_seqh_t * seqhdr)
                 if (seqhdr->patch_columns == 0) {
                     seqhdr->patch_column_width[0] = seqhdr->pic_width_in_lcu;
                     seqhdr->patch_columns = 1;
-                } else {
+                }
+                else {
                     seqhdr->patch_column_width[seqhdr->patch_columns] += seqhdr->pic_width_in_lcu - seqhdr->patch_width * seqhdr->patch_columns;
                     seqhdr->patch_columns += 1;
                 }
@@ -118,23 +118,31 @@ static int seq_init(uavs3d_dec_t * ctx, com_seqh_t * seqhdr)
                 if (seqhdr->patch_rows == 0) {
                     seqhdr->patch_row_height[0] = seqhdr->pic_height_in_lcu;
                     seqhdr->patch_rows = 1;
-                } else {
+                }
+                else {
                     seqhdr->patch_row_height[seqhdr->patch_rows] += seqhdr->pic_height_in_lcu - seqhdr->patch_height * seqhdr->patch_rows;
                     seqhdr->patch_rows += 1;
                 }
             }
         }
-    } else {
+    }
+    else {
         uavs3d_assert(0);
     }
+
+    memcpy(&ctx->seqhdr, seqhdr, sizeof(com_seqh_t));
+
+}
+static int seq_init(uavs3d_dec_t * ctx)
+{
+    int ret;
+    com_seqh_t * seqhdr = &ctx->seqhdr;
 
     /*** init uavs3d_dec_t ***/
 
     if (ctx->init_flag) {
         seq_free(ctx);
     }
-    memcpy(&ctx->seqhdr, seqhdr, sizeof(com_seqh_t));
-
     ret = com_picman_init(&ctx->pic_manager, seqhdr, ctx->frm_threads_nodes);
     uavs3d_assert_goto(!ret, ERR);
 
@@ -888,8 +896,12 @@ int __cdecl uavs3d_decode(void *h, uavs3d_io_frm_t* frm_io)
         if (seqhdr.horizontal_size != ctx->seqhdr.horizontal_size || seqhdr.vertical_size != ctx->seqhdr.vertical_size) {
             if (ctx->seqhdr.horizontal_size || ctx->seqhdr.vertical_size) {
                 return ERR_RESOLUTION_CHANGED;            }
-            ret = seq_init(ctx, &seqhdr);
+            update_seqhdr(ctx, &seqhdr);
+            ret = seq_init(ctx);
             uavs3d_assert_return(!ret, ret);
+        }
+        else {
+            update_seqhdr(ctx, &seqhdr);
         }
         frm_io->seqhdr = &ctx->seqhdr;
     }
