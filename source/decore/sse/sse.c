@@ -272,7 +272,7 @@ void uavs3d_funs_init_sse()
     uavs3d_funs_handle.intra_pred_hor  [UV_C] = uavs3d_ipred_chroma_hor_sse;
     uavs3d_funs_handle.intra_pred_ver  [UV_C] = uavs3d_ipred_chroma_ver_sse;
     uavs3d_funs_handle.intra_pred_ipf         = uavs3d_ipred_ipf_sse;
-    uavs3d_funs_handle.intra_pred_ipf_s16     = uavs3d_ipred_ipf_s16_sse;
+    //uavs3d_funs_handle.intra_pred_ipf_s16     = uavs3d_ipred_ipf_s16_sse;
 
     uavs3d_funs_handle.intra_pred_ang[ 4] = uavs3d_ipred_ang_x_4_sse;
     uavs3d_funs_handle.intra_pred_ang[ 6] = uavs3d_ipred_ang_x_6_sse;

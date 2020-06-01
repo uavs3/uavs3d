@@ -1806,7 +1806,7 @@ void uavs3d_ipred_ipf_s16_sse(pel *src, pel *dst, int i_dst, s16* pred, int flt_
                 pix_top = _mm_unpacklo_epi8(pix_top, zero);                 // 8bit->16bit
                 coef_cur = _mm_subs_epi16(coef_cur, coef_left);
 
-                val0 = _mm_mullo_epi16(pix_cur, coef_cur);
+                val0 = _mm_mullo_epi16(pix_cur, coef_cur);                  // bug: may be out of 16bit range
                 val1 = _mm_mullo_epi16(pix_left, coef_left);
                 val2 = _mm_mullo_epi16(pix_top, coef_top);
                 val0 = _mm_add_epi16(val0, val1);
