@@ -60,16 +60,12 @@ static tab_u8  com_tbl_deblock_beta[64] =
     23, 23, 24, 24, 25, 25, 26, 27
 };
 
-#define pack16to32_mask2(x,y) (((x) << 16)|((y) & 0x7FFF))
-#define CHECK_MVRANGE(pkt) (((pkt + pkt_mv_min) | (pkt_mv_max - pkt)) & 0x80004000)
 
 static int uavs3d_always_inline skip_filter(com_map_t *map, com_ref_pic_t refp[MAX_REFS][REFP_NUM], s8 *refi_p, com_pic_t *p_pic0, com_pic_t *p_pic1, int scup, int offset)
 {
     com_scu_t MbQ = map->map_scu[scup + offset];
     com_pic_t *q_pic0, *q_pic1;
     const com_scu_t mask = {0, 0, 0, 0, 1, 0, 0};
-    const u32 pkt_mv_min = pack16to32_mask2(3, 3);
-    const u32 pkt_mv_max = pkt_mv_min | 0x8000;
 
     if ((*(u8*)&MbQ) & (*(u8*)&mask)) {
         return 0;
@@ -82,14 +78,14 @@ static int uavs3d_always_inline skip_filter(com_map_t *map, com_ref_pic_t refp[M
         s16(*mv_q)[MV_D] = map->map_mv[scup + offset];
 
         if (REFI_IS_VALID(refi_p[REFP_0])) {
-            int mv_diff_pkt = ((M32(mv_p[REFP_0]) | 0x8000) - (M32(mv_q[REFP_0]) & 0xFFFF7FFF)) & 0xFFFF7FFF;
-            if (CHECK_MVRANGE(mv_diff_pkt)) {
+            if ((abs(mv_p[REFP_0][MV_X] - mv_q[REFP_0][MV_X]) >= 4) ||
+                (abs(mv_p[REFP_0][MV_Y] - mv_q[REFP_0][MV_Y]) >= 4)) {
                 return 0;
             }
         }
         if (REFI_IS_VALID(refi_p[REFP_1])) {
-            int mv_diff_pkt = ((M32(mv_p[REFP_1]) | 0x8000) - (M32(mv_q[REFP_1]) & 0xFFFF7FFF)) & 0xFFFF7FFF;
-            if (CHECK_MVRANGE(mv_diff_pkt)) {
+            if ((abs(mv_p[REFP_1][MV_X] - mv_q[REFP_1][MV_X]) >= 4) ||
+                (abs(mv_p[REFP_1][MV_Y] - mv_q[REFP_1][MV_Y]) >= 4)) {
                 return 0;
             }
         }
@@ -104,14 +100,14 @@ static int uavs3d_always_inline skip_filter(com_map_t *map, com_ref_pic_t refp[M
         s16(*mv_q)[MV_D] = map->map_mv[scup + offset];
 
         if (REFI_IS_VALID(refi_p[REFP_0])) {
-            int mv_diff_pkt = ((M32(mv_p[REFP_0]) | 0x8000) - (M32(mv_q[REFP_1]) & 0xFFFF7FFF)) & 0xFFFF7FFF;
-            if (CHECK_MVRANGE(mv_diff_pkt)) {
+            if ((abs(mv_p[REFP_0][MV_X] - mv_q[REFP_1][MV_X]) >= 4) ||
+                (abs(mv_p[REFP_0][MV_Y] - mv_q[REFP_1][MV_Y]) >= 4)) {
                 return 0;
             }
         }
         if (REFI_IS_VALID(refi_p[REFP_1])) {
-            int mv_diff_pkt = ((M32(mv_p[REFP_1]) | 0x8000) - (M32(mv_q[REFP_0]) & 0xFFFF7FFF)) & 0xFFFF7FFF;
-            if (CHECK_MVRANGE(mv_diff_pkt)) {
+            if ((abs(mv_p[REFP_1][MV_X] - mv_q[REFP_0][MV_X]) >= 4) ||
+                (abs(mv_p[REFP_1][MV_Y] - mv_q[REFP_0][MV_Y]) >= 4)) {
                 return 0;
             }
         }

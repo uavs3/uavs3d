@@ -131,14 +131,14 @@ static void uavs3d_always_inline scaling_mv_amvr(int dist_cur, int dist_neb, s16
             offset += add << MV_SCALE_PREC;
 
             if (mvp[MV_X]) {
-                s64 tmp_mv = mvp[MV_X] * ratio;
+                s64 tmp_mv = (s64)mvp[MV_X] * ratio;
                 s64 mask = tmp_mv >> 63;
                 tmp_mv = (mask ^ tmp_mv) - mask;
                 tmp_mv = (mask ^ (((tmp_mv + offset) >> MV_SCALE_PREC) & amvr_mask)) - mask;
                 mv[MV_X] = (s16)COM_CLIP3(COM_INT16_MIN, COM_INT16_MAX, tmp_mv);
             }
             if (mvp[MV_Y]) {
-                s64 tmp_mv = mvp[MV_Y] * ratio;
+                s64 tmp_mv = (s64)mvp[MV_Y] * ratio;
                 s64 mask = tmp_mv >> 63;
                 tmp_mv = (mask ^ tmp_mv) - mask;
                 tmp_mv = (mask ^ (((tmp_mv + offset) >> MV_SCALE_PREC) & amvr_mask)) - mask;
