@@ -103,8 +103,7 @@ static void update_seqhdr(uavs3d_dec_t * ctx, com_seqh_t * seqhdr)
                 if (seqhdr->patch_columns == 0) {
                     seqhdr->patch_column_width[0] = seqhdr->pic_width_in_lcu;
                     seqhdr->patch_columns = 1;
-                }
-                else {
+                } else {
                     seqhdr->patch_column_width[seqhdr->patch_columns] += seqhdr->pic_width_in_lcu - seqhdr->patch_width * seqhdr->patch_columns;
                     seqhdr->patch_columns += 1;
                 }
@@ -118,21 +117,21 @@ static void update_seqhdr(uavs3d_dec_t * ctx, com_seqh_t * seqhdr)
                 if (seqhdr->patch_rows == 0) {
                     seqhdr->patch_row_height[0] = seqhdr->pic_height_in_lcu;
                     seqhdr->patch_rows = 1;
-                }
-                else {
+                } else {
                     seqhdr->patch_row_height[seqhdr->patch_rows] += seqhdr->pic_height_in_lcu - seqhdr->patch_height * seqhdr->patch_rows;
                     seqhdr->patch_rows += 1;
                 }
             }
         }
-    }
-    else {
+    } else {
         uavs3d_assert(0);
     }
 
     memcpy(&ctx->seqhdr, seqhdr, sizeof(com_seqh_t));
 
+    ctx->seqhdr.alf_idx_map = ctx->alf_idx_map;
 }
+
 static int seq_init(uavs3d_dec_t * ctx)
 {
     int ret;
@@ -895,12 +894,12 @@ int __cdecl uavs3d_decode(void *h, uavs3d_io_frm_t* frm_io)
 
         if (seqhdr.horizontal_size != ctx->seqhdr.horizontal_size || seqhdr.vertical_size != ctx->seqhdr.vertical_size) {
             if (ctx->seqhdr.horizontal_size || ctx->seqhdr.vertical_size) {
-                return ERR_RESOLUTION_CHANGED;            }
+                return ERR_RESOLUTION_CHANGED;           
+            }
             update_seqhdr(ctx, &seqhdr);
             ret = seq_init(ctx);
             uavs3d_assert_return(!ret, ret);
-        }
-        else {
+        } else {
             update_seqhdr(ctx, &seqhdr);
         }
         frm_io->seqhdr = &ctx->seqhdr;
