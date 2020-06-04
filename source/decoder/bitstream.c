@@ -311,7 +311,7 @@ u8* dec_bs_demulate(u8 *start, u8 *end)
     return d;
 }
 
-u8* dec_bs_get_one_unit(com_bs_t *bs)
+u8* dec_bs_get_one_unit(com_bs_t *bs, u8 **next_start)
 {
     u8 *start = bs->cur;
     u8 *end   = bs->end + 1;
@@ -322,7 +322,7 @@ u8* dec_bs_get_one_unit(com_bs_t *bs)
         end = start + len - left_bytes;
     }
 
-    bs->cur = end;
+    *next_start = end;
 
     return dec_bs_demulate(start - 1, end);
 }

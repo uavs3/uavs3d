@@ -48,7 +48,7 @@ u32  dec_bs_next           (com_bs_t * bs, int size);
 int  dec_bs_read1          (com_bs_t * bs, int val);
 u32  dec_bs_read_ue        (com_bs_t * bs, u32 min, u32 max);
 int  dec_bs_read_se        (com_bs_t * bs, int min, int max);
-u8*  dec_bs_get_one_unit   (com_bs_t *bs);
+u8*  dec_bs_get_one_unit   (com_bs_t * bs, u8 **next_start);
 
 u8*  dec_bs_demulate(u8 *start, u8 *end);
 

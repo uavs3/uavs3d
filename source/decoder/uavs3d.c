@@ -616,9 +616,12 @@ com_pic_t* dec_pic(com_core_t *core, com_frm_t *frm)
         int adj_qp_cb, adj_qp_cr;
 
         if (new_patch) {
-            u8 *cur, *end;
-            int patch_x, patch_y;
-            int patch_idx = dec_parse_patch_header(bs, seqhdr, pichdr, sh);
+            u8 *end, *next;
+            int patch_x, patch_y, patch_idx;
+
+            end = dec_bs_get_one_unit(bs, &next);
+
+            patch_idx = dec_parse_patch_header(bs, seqhdr, pichdr, sh);
  
             if (patch_idx == -1 || patch_idx >= seqhdr->patch_columns * seqhdr->patch_rows) {
                 break;
@@ -631,9 +634,9 @@ com_pic_t* dec_pic(com_core_t *core, com_frm_t *frm)
             }
 
             /* init SBAC */
-            cur = bs->cur;
-            end = dec_bs_get_one_unit(bs);
-            lbac_init(lbac, cur, bs->end);
+            lbac_init(lbac, bs->cur, end);
+            bs->cur = next;
+
             com_lbac_ctx_init(&(lbac->ctx));
 
             /*initial pathdr info*/
