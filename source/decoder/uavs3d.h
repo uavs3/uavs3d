@@ -82,7 +82,7 @@ typedef struct
 #define ERR_LOSS_REF_FRAME          (-5)
 #define ERR_PIC_HEADER_UNREADY      (-6)
 #define ERR_SEQ_HEADER_UNREADY      (-7)
-#define ERR_RESOLUTION_CHANGED      (-8)
+#define ERR_SEQ_MAININFO_CHANGED    (-8)
 #define ERR_PIC_BUFFER_FULL         (-9)
 
 #define ERR_UNKNOWN               (-100)    

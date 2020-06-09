@@ -348,7 +348,6 @@ typedef struct uavs3d_com_core_t {
 
     com_sao_param_t(*sao_param_map)[N_C];
     u8             (*alf_enable_map)[N_C];
-    u8              *alf_idx_map; // point to uavs3d_dec_t::alf_idx_map, this is a const map
 
     pel         *linebuf_intra[2];
     pel         *linebuf_sao[2];

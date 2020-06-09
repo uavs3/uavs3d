@@ -895,10 +895,15 @@ int __cdecl uavs3d_decode(void *h, uavs3d_io_frm_t* frm_io)
 
         dec_parse_ext_and_usr_data(bs, &seqhdr, NULL, 0, -1);
 
-        if (seqhdr.horizontal_size != ctx->seqhdr.horizontal_size || seqhdr.vertical_size != ctx->seqhdr.vertical_size) {
-            if (ctx->seqhdr.horizontal_size || ctx->seqhdr.vertical_size) {
-                return ERR_RESOLUTION_CHANGED;           
+        if (seqhdr.horizontal_size          != ctx->seqhdr.horizontal_size          || 
+            seqhdr.vertical_size            != ctx->seqhdr.vertical_size            ||
+            seqhdr.log2_max_cu_width_height != ctx->seqhdr.log2_max_cu_width_height ||
+            seqhdr.encoding_precision       != ctx->seqhdr.encoding_precision) 
+        {
+            if (ctx->seqhdr.horizontal_size) {
+                return ERR_SEQ_MAININFO_CHANGED;
             }
+            
             update_seqhdr(ctx, &seqhdr);
             ret = seq_init(ctx);
             uavs3d_assert_return(!ret, ret);
