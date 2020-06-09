@@ -588,6 +588,8 @@ void init_core_by_frm(com_core_t *core, com_frm_t *frm)
 
 com_pic_t* dec_pic(com_core_t *core, com_frm_t *frm)
 {
+    core->seqhdr = &frm->seqhdr;
+
     init_core_by_frm(core, frm);
 
     com_seqh_t *seqhdr =  core->seqhdr;
@@ -969,7 +971,7 @@ int __cdecl uavs3d_decode(void *h, uavs3d_io_frm_t* frm_io)
         ctx->frm_nodes_list[ctx->frm_node_end].pic_header_inited = 0;
 
         if (ctx->dec_cfg.frm_threads == 1) {
-
+            memcpy(&frm->seqhdr, &ctx->seqhdr, sizeof(com_seqh_t));
             pic = dec_pic(ctx->core, frm);
             uavs3d_assert_return(!ret, ret);
 
@@ -983,6 +985,8 @@ int __cdecl uavs3d_decode(void *h, uavs3d_io_frm_t* frm_io)
             ctx->output++;
             uavs3d_output_frame(ctx, frm_io, flush_flag, ctx->callback);
         } else {
+            memcpy(&frm->seqhdr, &ctx->seqhdr, sizeof(com_seqh_t));
+
             if (uavs3d_threadpool_run_try(ctx->frm_threads_pool, (void *(*)(void *, void *))dec_pic, frm, 1) < 0) {
                 int got_pic = 0;
 

@@ -162,8 +162,6 @@ com_core_t* com_core_init(com_seqh_t *seqhdr)
         return NULL;
     }
 
-    core->seqhdr = seqhdr;
-
     map = &core->map;
 
     total_mem_size = ALIGN_MASK     + sizeof(com_scu_t) * seqhdr->f_scu +             // map_scu

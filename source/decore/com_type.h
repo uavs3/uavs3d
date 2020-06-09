@@ -227,6 +227,7 @@ typedef struct uavs3d_com_motion_t {
 typedef struct uavs3d_com_frm_t {
     com_pic_t         *pic;
     int                pic_header_inited;
+    com_seqh_t         seqhdr;
     com_pic_header_t   pichdr;
     u8                *bs_buf;
     int                bs_buf_size;
