@@ -44,7 +44,9 @@
 
 static void seq_free(uavs3d_dec_t * ctx)
 {
-    int i;
+    if (ctx->frm_threads_pool) {
+        uavs3d_threadpool_delete(ctx->frm_threads_pool);
+    }
 
     com_free(ctx->alf_idx_map);
     com_picman_free(&ctx->pic_manager);
@@ -52,11 +54,7 @@ static void seq_free(uavs3d_dec_t * ctx)
     com_core_free(ctx->core);
     ctx->core = NULL;
 
-    if (ctx->frm_threads_pool) {
-        uavs3d_threadpool_delete(ctx->frm_threads_pool);
-    }
-
-    for (i = 0; i < ctx->frm_nodes; i++) {
+    for (int i = 0; i < ctx->frm_nodes; i++) {
         com_free(ctx->frm_nodes_list[i].bs_buf);
     }
     com_free(ctx->frm_nodes_list);
