@@ -77,6 +77,10 @@ typedef struct uavs3d_com_pic_t {
     int        refpic_num[2];
     long long  refpic[2][16];
 
+    long long  pkt_pos;
+    int        pkt_size;
+    int        doi;
+
     /*** for parallel ***/
     int                     parallel_enable;
     int                     finished_line;
