@@ -780,6 +780,10 @@ int init_dec_frm(uavs3d_dec_t *ctx, com_frm_t *frm, uavs3d_io_frm_t *frm_io)
     pic->dtr = pichdr->decode_order_index;
     pic->type = pichdr->slice_type;
 
+    pic->pkt_pos  = frm_io->pkt_pos;
+    pic->pkt_size = frm_io->pkt_size;
+    pic->doi      = frm->pichdr.decode_order_index + (DOI_CYCLE_LENGTH * (int)ctx->pic_manager.doi_cycles);
+
     for (int i = 0; i < frm->num_refp[REFP_0]; i++) {
         pic->refpic[REFP_0][i] = frm->refp[i][REFP_0].pic->ptr;
     }
@@ -849,6 +853,10 @@ int uavs3d_output_frame(void *id, uavs3d_io_frm_t *frm, int flush, uavs3d_lib_ou
             frm->pts  = pic->pts;
             frm->dts  = pic->dts;
             frm->type = pic->type;
+
+            frm->pkt_pos  = pic->pkt_pos;
+            frm->pkt_size = pic->pkt_size;
+            frm->doi      = pic->doi;
 
             frm->refpic_num[0] = pic->refpic_num[0];
             frm->refpic_num[1] = pic->refpic_num[1];
