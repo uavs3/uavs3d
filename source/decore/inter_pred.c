@@ -535,7 +535,7 @@ void com_mc_affine(com_core_t *core, pel *pred_buf)
     int i_dstl, i_dstc;
     int blk_dim = cu_width * cu_height;
 
-    if (core->pichdr->affine_subblock_size_idx == 1 || REFI_IS_VALID(refi[REFP_0]) && REFI_IS_VALID(refi[REFP_1])) {
+    if (core->pichdr->affine_subblock_size_idx == 1 || (REFI_IS_VALID(refi[REFP_0]) && REFI_IS_VALID(refi[REFP_1]))) {
         sub_blk_size = 8;
     } else {
         sub_blk_size = 4;

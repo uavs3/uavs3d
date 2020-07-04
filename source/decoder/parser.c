@@ -497,7 +497,7 @@ static int extension_data(com_bs_t * bs, com_seqh_t *seqhdr, com_pic_header_t *p
 
 int dec_parse_ext_and_usr_data(com_bs_t * bs, com_seqh_t *seqhdr, com_pic_header_t * pichdr, int i, int slicetype)
 {
-    while ((dec_bs_next(bs, 32) == 0x1B5) || (dec_bs_next(bs, 32) == 0x1B2) && bs->cur <= bs->end) {
+    while ((dec_bs_next(bs, 32) == 0x1B5 || dec_bs_next(bs, 32) == 0x1B2) && bs->cur <= bs->end) {
 
         if (dec_bs_next(bs, 32) == 0x1B5) {
             extension_data(bs, seqhdr, pichdr, i, slicetype);
@@ -2317,7 +2317,7 @@ s8 dec_parse_split_mode(com_core_t *core, com_lbac_t *lbac, int split_tab, int c
             } else if (EnableEQT) {
                 split_typ = 1;
             }
-            if (cu_width == 128 && cu_height == 64 || cu_width == 64 && cu_height == 128) {
+            if ((cu_width == 128 && cu_height == 64) || (cu_width == 64 && cu_height == 128)) {
                 uavs3d_assert(split_typ == 0);
                 split_typ = 0;  
             }

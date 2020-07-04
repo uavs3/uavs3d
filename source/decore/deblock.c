@@ -615,7 +615,7 @@ void com_deblock_lcu_row(com_core_t *core, int lcu_y)
                     com_df_cal_c_param(pichdr, qp_p, qp_q, qp_offset, shift, &alpha_hor_u, &beta_hor_u, pichdr->chroma_quant_param_delta_cb);
                     com_df_cal_c_param(pichdr, qp_p, qp_q, qp_offset, shift, &alpha_hor_v, &beta_hor_v, pichdr->chroma_quant_param_delta_cr);
                 } 
-                if (pix_x % seqhdr->max_cuwh == 0 && pix_x || pix_x_ver % seqhdr->max_cuwh == 0 && pix_x_ver < seqhdr->pic_width) {
+                if ((pix_x % seqhdr->max_cuwh == 0 && pix_x) || (pix_x_ver % seqhdr->max_cuwh == 0 && pix_x_ver < seqhdr->pic_width)) {
                     int qp_q;
                     if (pix_x_ver % seqhdr->max_cuwh == 0) {
                         qp_q = map_qp[1];

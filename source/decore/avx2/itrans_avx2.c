@@ -2368,7 +2368,7 @@ void itrans_dct8_pb4_avx2(s16 *coeff, s16 *block, int shift, int line, int limit
         e3 = _mm256_add_epi32(e2, factor);
 
         r0 = _mm256_packs_epi32(_mm256_srai_epi32(e3, shift), zero);
-        _mm256_maskstore_epi64((s64*)block, mask, r0);
+        _mm256_maskstore_epi64((long long*)block, mask, r0);
         coeff++;
         block += 4;
     }
@@ -2424,7 +2424,7 @@ void itrans_dct8_pb8_avx2(s16 *coeff, s16 *block, int shift, int line, int limit
         r0 = _mm256_add_epi32(e6, rnd_factor);
         r1 = _mm256_packs_epi32(_mm256_srai_epi32(r0, shift), zero);
         r2 = _mm256_permute4x64_epi64(r1, 0x08);
-        _mm256_maskstore_epi64((s64*)block, mask, r2);
+        _mm256_maskstore_epi64((long long*)block, mask, r2);
 
         coeff++;
         block += 8;
@@ -2491,7 +2491,7 @@ void itrans_dct8_pb16_avx2(s16 *coeff, s16 *block, int shift, int line, int limi
             r0 = _mm256_add_epi32(v0, rnd_factor);
             r1 = _mm256_packs_epi32(_mm256_srai_epi32(r0, shift), zero);
             r2 = _mm256_permute4x64_epi64(r1, 0x08);
-            _mm256_maskstore_epi64((s64*)block, mask, r2);
+            _mm256_maskstore_epi64((long long*)block, mask, r2);
             coeff -= (16 * line);
             pb16 -= 248;
             block += 8;
@@ -2561,7 +2561,7 @@ void itrans_dct8_pb32_avx2(s16 *coeff, s16 *block, int shift, int line, int limi
             r0 = _mm256_add_epi32(v0, rnd_factor);
             r1 = _mm256_packs_epi32(_mm256_srai_epi32(r0, shift), zero);
             r2 = _mm256_permute4x64_epi64(r1, 0x08);
-            _mm256_maskstore_epi64((s64*)block, mask, r2);
+            _mm256_maskstore_epi64((long long*)block, mask, r2);
             coeff -= (32 * line);
             pb16 -= 1016;
             block += 8;
@@ -2616,7 +2616,7 @@ void itrans_dst7_pb4_avx2(s16 *coeff, s16 *block, int shift, int line, int limit
         e3 = _mm256_add_epi32(e2, factor);
 
         r0 = _mm256_packs_epi32(_mm256_srai_epi32(e3, shift), zero);
-        _mm256_maskstore_epi64((s64*)block, mask, r0);
+        _mm256_maskstore_epi64((long long*)block, mask, r0);
         coeff++;
         block += 4;
     }
@@ -2672,7 +2672,7 @@ void itrans_dst7_pb8_avx2(s16 *coeff, s16 *block, int shift, int line, int limit
         r0 = _mm256_add_epi32(e6, rnd_factor);
         r1 = _mm256_packs_epi32(_mm256_srai_epi32(r0, shift), zero);
         r2 = _mm256_permute4x64_epi64(r1, 0x08);
-        _mm256_maskstore_epi64((s64*)block, mask, r2);
+        _mm256_maskstore_epi64((long long*)block, mask, r2);
 
         coeff++;
         block += 8;
@@ -2740,7 +2740,7 @@ void itrans_dst7_pb16_avx2(s16 *coeff, s16 *block, int shift, int line, int limi
             r0 = _mm256_add_epi32(v0, rnd_factor);
             r1 = _mm256_packs_epi32(_mm256_srai_epi32(r0, shift), zero);
             r2 = _mm256_permute4x64_epi64(r1, 0x08);
-            _mm256_maskstore_epi64((s64*)block, mask, r2);
+            _mm256_maskstore_epi64((long long*)block, mask, r2);
             coeff -= (16 * line);
             pb16 -= 248;
             block += 8;
@@ -2810,7 +2810,7 @@ void itrans_dst7_pb32_avx2(s16 *coeff, s16 *block, int shift, int line, int limi
             r0 = _mm256_add_epi32(v0, rnd_factor);
             r1 = _mm256_packs_epi32(_mm256_srai_epi32(r0, shift), zero);
             r2 = _mm256_permute4x64_epi64(r1, 0x08);
-            _mm256_maskstore_epi64((s64*)block, mask, r2);
+            _mm256_maskstore_epi64((long long*)block, mask, r2);
             coeff -= (32 * line);
             pb16 -= 1016;
             block += 8;

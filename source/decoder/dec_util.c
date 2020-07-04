@@ -1460,7 +1460,7 @@ int dec_check_pic_md5(com_pic_t * pic, u8 md5_buf[16])
     uavs3d_assert_return(!ret, ret);
     
     if (memcmp(md5_buf, pic_md5, 16)) {
-        printf(" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  Warnning: enc/dec mismatch! ptr = %lld\n", pic->ptr);
+        printf(" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  Warnning: enc/dec mismatch! ptr = %lld\n", (long long)pic->ptr);
     }
 
     return RET_OK;
