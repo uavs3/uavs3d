@@ -58,8 +58,9 @@ typedef struct uavs3d_com_pic_t {
     int        width_chroma;                
     int        height_chroma;               
     int        padsize_luma;                
-    int        padsize_chroma;                                     
-    int        dtr; // -256 ~255
+    int        padsize_chroma; 
+    int        doi; // -256 ~255                                    
+    int        dtr;
     s64        ptr; 
     int        output_delay;
     u8         is_ref;                      
@@ -79,7 +80,6 @@ typedef struct uavs3d_com_pic_t {
 
     long long  pkt_pos;
     int        pkt_size;
-    int        doi;
 
     /*** for parallel ***/
     int                     parallel_enable;

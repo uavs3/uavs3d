@@ -663,7 +663,7 @@ int dec_parse_pic_header(com_bs_t * bs, com_pic_header_t * pichdr, com_seqh_t * 
         for (int i = 0; i < pm->cur_pb_size; i++) {
             com_pic_t *pic = pm->list[i];
             if (pic != NULL) {
-                pic->dtr = pic->dtr - DOI_CYCLE_LENGTH;
+                pic->doi = pic->doi - DOI_CYCLE_LENGTH;
             }
         }
     } 

@@ -227,6 +227,7 @@ typedef struct uavs3d_io_frm_t {
     /* frame info */
     long long   ptr;
     long long   pts;
+    long long   dtr;
     long long   dts;
     int         type;
     int         refpic_num[2];
@@ -234,7 +235,6 @@ typedef struct uavs3d_io_frm_t {
 
     long long   pkt_pos;
     int         pkt_size;
-    int         doi;
 
     /* bitstream */
     unsigned char *bs;

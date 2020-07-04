@@ -76,7 +76,7 @@ typedef struct uavs3d_dec_t {
 
     /* Reference Frame Management */
     com_pic_manager_t     pic_manager;
-    int                   cur_decoded_dtr;
+    int                   cur_decoded_doi;
     int                   output;
 
     /* Frame Level Parallel */

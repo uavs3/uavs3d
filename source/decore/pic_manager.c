@@ -66,7 +66,7 @@ int com_picman_get_active_refp(com_frm_t *frm, com_pic_manager_t *pm)
         int refPicDoi = (pichdr->decode_order_index - pichdr->rpl_l0.delta_doi[i]);
         int j = 0;
 
-        while (j < pm->cur_pb_size && (pm->list[j]->dtr != refPicDoi || !pm->list[j]->is_ref)) j++;
+        while (j < pm->cur_pb_size && (pm->list[j]->doi != refPicDoi || !pm->list[j]->is_ref)) j++;
 
         if (j < pm->cur_pb_size) {
             set_ref_pic(&refp[i][REFP_0], pm->list[j], pichdr->ptr);
@@ -85,7 +85,7 @@ int com_picman_get_active_refp(com_frm_t *frm, com_pic_manager_t *pm)
         int refPicDoi = (pichdr->decode_order_index - pichdr->rpl_l1.delta_doi[i]);
         int j = 0;
 
-        while (j < pm->cur_pb_size && (pm->list[j]->dtr != refPicDoi || !pm->list[j]->is_ref)) j++;
+        while (j < pm->cur_pb_size && (pm->list[j]->doi != refPicDoi || !pm->list[j]->is_ref)) j++;
 
         if (j < pm->cur_pb_size) {
             set_ref_pic(&refp[i][REFP_1], pm->list[j], pichdr->ptr);
@@ -108,13 +108,13 @@ int com_picman_mark_refp(com_pic_manager_t *pm, com_pic_header_t *pichdr)
             int j;
        
             for (j = 0; j < pichdr->rpl_l0.num; j++) {
-                if (pic->dtr == (pichdr->decode_order_index - pichdr->rpl_l0.delta_doi[j])) {
+                if (pic->doi == (pichdr->decode_order_index - pichdr->rpl_l0.delta_doi[j])) {
                     break;
                 }
             }
             if (j == pichdr->rpl_l0.num) {
                 for (j = 0; j < pichdr->rpl_l1.num; j++) {
-                    if (pic->dtr == (pichdr->decode_order_index - pichdr->rpl_l1.delta_doi[j])) {
+                    if (pic->doi == (pichdr->decode_order_index - pichdr->rpl_l1.delta_doi[j])) {
                         break;
                     }
                 }
@@ -169,7 +169,7 @@ com_pic_t* com_picman_out_pic(com_pic_manager_t * pm, int * err, u8 cur_pic_doi,
             com_pic_t *pic = list[i];
             if (pic != NULL && pic->is_output) {
                 found = 1;
-                if ((pic->dtr + pic->output_delay <= cur_pic_doi)) {
+                if ((pic->doi + pic->output_delay <= cur_pic_doi)) {
                     exist_pic = 1;
                     if (min_ptr >= pic->ptr) {
                         min_ptr = pic->ptr;
