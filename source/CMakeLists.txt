@@ -16,8 +16,8 @@ set_source_files_properties(${DIR_X86_SRC} PROPERTIES COMPILE_FLAGS "${CMAKE_C_F
 set_source_files_properties(${DIR_X86_256_SRC} PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -fPIC -std=c99 -O3 -mavx2")
 
 # get version
-set (CONFIG_DIR ..)
-execute_process(COMMAND sh version.sh ..)
+set (CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
+execute_process(COMMAND sh ${CONFIG_DIR}/version.sh ${CONFIG_DIR})
 
 function(extract_version_string version_file version_string_out)
   file(STRINGS "${version_file}" uavs3d_version REGEX "VERSION_STR")
