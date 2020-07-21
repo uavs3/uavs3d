@@ -320,7 +320,7 @@ void ipred_plane(pel *src, pel *dst, int i_dst, int w, int h, int bit_depth)
     int  ib_shift[5] = { 7, 10, 11, 15, 19 };
     int  idx_w = g_tbl_log2[w] - 2;
     int  idx_h = g_tbl_log2[h] - 2;
-    int  im_h, is_h, im_v, is_v, temp, temp2;
+    int  im_h, is_h, im_v, is_v, temp;
     int  max_pel = (1 << bit_depth) - 1;
     int  val;
 
@@ -343,7 +343,7 @@ void ipred_plane(pel *src, pel *dst, int i_dst, int w, int h, int bit_depth)
     temp = a - (h2 - 1) * c - (w2 - 1) * b + 16;
     
     for (y = 0; y < h; y++) {
-        temp2 = temp;
+        int temp2 = temp;
         for (x = 0; x < w; x++) {
             val = temp2 >> 5;
             dst[x] = (pel)COM_CLIP3(0, max_pel, val);
@@ -368,7 +368,7 @@ void ipred_plane_ipf(pel *src, s16 *dst, int w, int h)
     int  ib_shift[5] = { 7, 10, 11, 15, 19 };
     int  idx_w = g_tbl_log2[w] - 2;
     int  idx_h = g_tbl_log2[h] - 2;
-    int  im_h, is_h, im_v, is_v, temp, temp2;
+    int  im_h, is_h, im_v, is_v, temp;
     im_h = ib_mult[idx_w];
     is_h = ib_shift[idx_w];
     im_v = ib_mult[idx_h];
@@ -388,7 +388,7 @@ void ipred_plane_ipf(pel *src, s16 *dst, int w, int h)
     temp = a - (h2 - 1) * c - (w2 - 1) * b + 16;
 
     for (y = 0; y < h; y++) {
-        temp2 = temp;
+        int temp2 = temp;
         for (x = 0; x < w; x++) {
             dst[x] = (s16)(temp2 >> 5);
             temp2 += b;
@@ -416,7 +416,7 @@ void ipred_plane_uv(pel *src, pel *dst, int i_dst, int w, int h, int bit_depth)
     int  idx_w = g_tbl_log2[w] - 2;
     int  idx_h = g_tbl_log2[h] - 2;
     int  im_h, is_h, im_v, is_v;
-    int  temp_u, temp_v, temp2_u, temp2_v;
+    int  temp_u, temp_v;
     int  max_pel = (1 << bit_depth) - 1;
     int  val_u, val_v;
 
@@ -448,8 +448,8 @@ void ipred_plane_uv(pel *src, pel *dst, int i_dst, int w, int h, int bit_depth)
     temp_v = a_v - (h2 - 1) * c_v - (w2 - 1) * b_v + 16;
 
     for (y = 0; y < h; y++) {
-        temp2_u = temp_u;
-        temp2_v = temp_v;
+        int temp2_u = temp_u;
+        int temp2_v = temp_v;
         for (x = 0; x < width2; x += 2) {
             val_u = temp2_u >> 5;
             val_v = temp2_v >> 5;
@@ -475,8 +475,7 @@ void ipred_bi(pel *src, pel *dst, int i_dst, int w, int h, int bit_depth)
     int ishift = COM_MIN(ishift_x, ishift_y);
     int ishift_xy = ishift_x + ishift_y + 1;
     int offset = 1 << (ishift_x + ishift_y);
-    int a, b, c, wt, wxy, tmp;
-    int predx;
+    int a, b, c, wt, tmp;
     int ref_up[MAX_CU_SIZE], ref_le[MAX_CU_SIZE], up[MAX_CU_SIZE], le[MAX_CU_SIZE], wy[MAX_CU_SIZE];
     int wc, tbl_wc[6] = {-1, 21, 13, 7, 4, 2};
     int max_pel = (1 << bit_depth) - 1;
@@ -510,8 +509,8 @@ void ipred_bi(pel *src, pel *dst, int i_dst, int w, int h, int bit_depth)
         tmp += wt;
     }
     for( y = 0; y < h; y++ ) {
-        predx = ref_le[y];
-        wxy = 0;
+        int predx = ref_le[y];
+        int wxy = 0;
         for( x = 0; x < w; x++ ) {
             predx += le[y];
             ref_up[x] += up[x];
@@ -534,8 +533,7 @@ void ipred_bi_ipf(pel *src, s16 *dst, int w, int h)
     int ishift = COM_MIN(ishift_x, ishift_y);
     int ishift_xy = ishift_x + ishift_y + 1;
     int offset = 1 << (ishift_x + ishift_y);
-    int a, b, c, wt, wxy, tmp;
-    int predx;
+    int a, b, c, wt, tmp;
     int ref_up[MAX_CU_SIZE], ref_le[MAX_CU_SIZE], up[MAX_CU_SIZE], le[MAX_CU_SIZE], wy[MAX_CU_SIZE];
     int wc, tbl_wc[6] = { -1, 21, 13, 7, 4, 2 };
     wc = ishift_x > ishift_y ? ishift_x - ishift_y : ishift_y - ishift_x;
@@ -566,8 +564,8 @@ void ipred_bi_ipf(pel *src, s16 *dst, int w, int h)
         tmp += wt;
     }
     for (y = 0; y < h; y++) {
-        predx = ref_le[y];
-        wxy = 0;
+        int predx = ref_le[y];
+        int wxy = 0;
         for (x = 0; x < w; x++) {
             predx += le[y];
             ref_up[x] += up[x];
@@ -589,9 +587,8 @@ void ipred_bi_uv(pel *src, pel *dst, int i_dst, int w, int h, int bit_depth)
     int ishift = COM_MIN(ishift_x, ishift_y);
     int ishift_xy = ishift_x + ishift_y + 1;
     int offset = 1 << (ishift_x + ishift_y);
-    int a_u, b_u, c_u, wt_u, wxy_u, tmp_u;
-    int a_v, b_v, c_v, wt_v, wxy_v, tmp_v;
-    int predx_u, predx_v;
+    int a_u, b_u, c_u, wt_u, tmp_u;
+    int a_v, b_v, c_v, wt_v, tmp_v;
     int ref_up[MAX_CU_SIZE], ref_le[MAX_CU_SIZE], up[MAX_CU_SIZE], le[MAX_CU_SIZE], wy[MAX_CU_SIZE];
     int wc, tbl_wc[6] = { -1, 21, 13, 7, 4, 2 };
     int w2 = w << 1;
@@ -640,9 +637,10 @@ void ipred_bi_uv(pel *src, pel *dst, int i_dst, int w, int h, int bit_depth)
     }
     for (y = 0; y < h; y++) {
         int y2 = y << 1;
-        predx_u = ref_le[y2    ];
-        predx_v = ref_le[y2 + 1];
-        wxy_u = wxy_v = 0;
+        int predx_u = ref_le[y2    ];
+        int predx_v = ref_le[y2 + 1];
+        int wxy_u = 0;
+        int wxy_v = 0;
         for (x = 0; x < w2; x += 2) {
             predx_u += le[y2];
             predx_v += le[y2 + 1];
@@ -1034,7 +1032,6 @@ static void uavs3d_always_inline ipf_core_s16(pel *src, pel *dst, int i_dst, s16
     s32 filter_idx_ver = (s32)g_tbl_log2[h] - 2; //Block Size
     s32 ver_filter_range = COM_MIN(h, 10);
     s32 hor_filter_range = COM_MIN(w, 10);
-    int max_val = (1 << bit_depth) - 1;
 
     // TODO: g_ipf_pred_param doesn't support 128
     if (filter_idx_hor > 4) {
@@ -1300,7 +1297,6 @@ static void xPredIntraAngAdi_X_8(pel *pSrc, pel *dst, int i_dst, int uiDirMode, 
     int line_size = iWidth + iHeight / 2 - 1;
     int real_size = min(line_size, iWidth * 2 + 1);
     int i;
-    int pad1, pad2;
     int aligned_line_size = ((line_size + 15) >> 4) << 4;
     pel *pfirst[2] = { first_line, first_line + aligned_line_size };
 
@@ -1311,6 +1307,8 @@ static void xPredIntraAngAdi_X_8(pel *pSrc, pel *dst, int i_dst, int uiDirMode, 
 
     // padding
     if (real_size < line_size) {
+        int pad1, pad2;
+
         pfirst[1][real_size - 1] = pfirst[1][real_size - 2];
 
         pad1 = pfirst[0][real_size - 1];
@@ -1466,7 +1464,6 @@ static void xPredIntraAngAdi_Y_28(pel *pSrc, pel *dst, int i_dst, int uiDirMode,
     int real_size = min(line_size, iHeight * 4 + 1);
     int i;
     int iHeight2 = iHeight << 1;
-    int pad1, pad2;
 
     for (i = 0; i < real_size; i += 2, pSrc--) {
         first_line[i] = (pSrc[0] + (pSrc[-1] + pSrc[-2]) * 3 + pSrc[-3] + 4) >> 3;
@@ -1475,6 +1472,7 @@ static void xPredIntraAngAdi_Y_28(pel *pSrc, pel *dst, int i_dst, int uiDirMode,
 
     // padding
     if (real_size < line_size) {
+        int pad1, pad2;
         first_line[i - 1] = first_line[i - 3];
 
         pad1 = first_line[i - 2];

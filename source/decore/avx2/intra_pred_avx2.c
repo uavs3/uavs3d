@@ -204,7 +204,7 @@ void uavs3d_ipred_hor_avx2(pel *src, pel *dst, int i_dst, int width, int height)
 
 void uavs3d_ipred_dc_avx2(pel *src, pel *dst, int i_dst, int width, int height, u16 avail_cu, int bit_depth)
 {
-	int   i, x, y;
+	int   x, y;
 	int   dc;
 	pel  *p_src = src - 1;
     int left_avail = IS_AVAIL(avail_cu, AVAIL_LE);
@@ -212,6 +212,7 @@ void uavs3d_ipred_dc_avx2(pel *src, pel *dst, int i_dst, int width, int height, 
 
     if (left_avail && above_avail) {
         int length = width + height + 1;
+        int i;
         __m128i sum = _mm_setzero_si128();
         __m128i val;
 
@@ -2737,7 +2738,6 @@ void uavs3d_ipred_ang_xy_18_avx2(pel *src, pel *dst, int i_dst, int mode, int wi
             memcpy(dst, pfirst--, width * sizeof(pel));
             dst += i_dst;
         }
-        break;
         break;
     }
 

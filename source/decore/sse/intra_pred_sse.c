@@ -713,13 +713,14 @@ void uavs3d_ipred_chroma_hor_sse(pel *src, pel *dst, int i_dst, int width, int h
 
 void uavs3d_ipred_dc_sse(pel *src, pel *dst, int i_dst, int width, int height, u16 avail_cu, int bit_depth)
 {
-    int  i, x, y;
+    int  x, y;
     int  dc;
     pel  *p_src = src - 1;
     int left_avail = IS_AVAIL(avail_cu, AVAIL_LE);
     int above_avail = IS_AVAIL(avail_cu, AVAIL_UP);
 
     if (left_avail && above_avail) {
+        int i;
         int length = width + height + 1;
         __m128i sum = _mm_setzero_si128();
         __m128i val;
@@ -828,7 +829,7 @@ void uavs3d_ipred_dc_sse(pel *src, pel *dst, int i_dst, int width, int height, u
 void uavs3d_ipred_chroma_dc_sse(pel *src, pel *dst, int i_dst, int width, int height, u16 avail_cu, int bit_depth)
 {
     __m128i T;
-    int  i, x, y;
+    int  x, y;
     int  dcU, dcV;
     pel  *p_src = src - 2;
     int left_avail = IS_AVAIL(avail_cu, AVAIL_LE);
@@ -838,6 +839,7 @@ void uavs3d_ipred_chroma_dc_sse(pel *src, pel *dst, int i_dst, int width, int he
         int height2 = height << 1;
         int wh = width + height;
         int length = (wh << 1) + 2;  // 2*(width + height + 1)
+        int i;
         __m128i sum = _mm_setzero_si128();
         __m128i val;
 
@@ -1787,7 +1789,6 @@ void uavs3d_ipred_ipf_s16_sse(pel *src, pel *dst, int i_dst, s16* pred, int flt_
 {
     pel *p_top = src + 1;
     int row;
-    int max_val = (1 << bit_depth) - 1;
     __m128i c_32 = _mm_set1_epi16(32);
     __m128i zero = _mm_setzero_si128();
     if (w == 4) {

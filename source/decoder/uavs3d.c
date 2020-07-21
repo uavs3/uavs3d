@@ -1060,7 +1060,7 @@ int __cdecl uavs3d_flush(void *h, uavs3d_io_frm_t* frm_out)
 
 void* __cdecl uavs3d_create(uavs3d_cfg_t * dec_cfg, uavs3d_lib_output_callback_t callback, int * err)
 {
-    uavs3d_dec_t *ctx = NULL;
+    uavs3d_dec_t *ctx;
 
     printf("libuavs3d(%2d): %s_%s, %s\n", BIT_DEPTH, VERSION_STR, VERSION_TYPE, VERSION_SHA1);
 

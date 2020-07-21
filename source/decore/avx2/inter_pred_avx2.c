@@ -2173,19 +2173,7 @@ void uavs3d_if_hor_ver_luma_w4_avx2(const pel *src, int i_src, pel *dst, int i_d
 
 void uavs3d_if_hor_ver_luma_w8_avx2(const pel *src, int i_src, pel *dst, int i_dst, int width, int height, const s8 *coef_x, const s8 *coef_y, int max_val)
 {
-    const int i_tmp = 8;
-    const int i_tmp2 = 16;
-    const int i_tmp3 = 24;
-    const int i_tmp4 = 32;
-    const int i_tmp5 = 40;
-    const int i_tmp6 = 48;
-    const int i_tmp7 = 56;;
-    const int i_tmp8 = 64;
-    const int i_tmp9 = 72;;
-    const int i_tmp10 = 80;
     const int i_src2 = i_src << 1;
-    int row;
-    int shift = 12;
     
     __m256i T0, T1, T2, T3, T4, T5, T6, T7, T8, T9;
     __m256i r0, r1, r2, r3, r4, r5, r6, r7, r8, r9;
@@ -2201,6 +2189,7 @@ void uavs3d_if_hor_ver_luma_w8_avx2(const pel *src, int i_src, pel *dst, int i_d
 
     //HOR
     {
+        int row;
         src = src - 3 * i_src - 3;
 
         // first row
@@ -2260,6 +2249,7 @@ void uavs3d_if_hor_ver_luma_w8_avx2(const pel *src, int i_src, pel *dst, int i_d
         __m256i mCoefy2 = _mm256_cvtepi8_epi16(mCoefy22);
         __m256i mCoefy3 = _mm256_cvtepi8_epi16(mCoefy33);
         __m256i mCoefy4 = _mm256_cvtepi8_epi16(mCoefy44);
+        const int shift = 12;
 
         while (height > 0) {
             __m128i s0, s1;
@@ -2397,7 +2387,6 @@ void uavs3d_if_hor_ver_luma_w16_avx2(const pel *src, int i_src, pel *dst, int i_
 {
     ALIGNED_32(s16 tmp_res[(128 + 7) * 16]);
     s16 *tmp = tmp_res;
-    int row;
     __m256i mVal1, mVal2, mVal;
     __m256i T0, T1, T2, T3, T4, T5, T6, T7, T8, T9;
     __m256i S0, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10;
@@ -2406,6 +2395,7 @@ void uavs3d_if_hor_ver_luma_w16_avx2(const pel *src, int i_src, pel *dst, int i_
 
     //HOR
     {
+        int row;
         __m256i mSwitch1 = _mm256_setr_epi8(0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8);
         __m256i mSwitch2 = _mm256_setr_epi8(2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10);
         __m256i mSwitch3 = _mm256_setr_epi8(4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12);
@@ -2614,10 +2604,10 @@ void uavs3d_if_hor_ver_luma_w32_avx2(const pel *src, int i_src, pel *dst, int i_
 {
     ALIGNED_32(s16 tmp_res[(128 + 7) * 32]);
     s16 *tmp = tmp_res;
-    int row, col;
     const int i_tmp = 32;
     //HOR
     {
+        int row;
         __m256i mSwitch1 = _mm256_setr_epi8(0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8);
         __m256i mSwitch2 = _mm256_setr_epi8(2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10);
         __m256i mSwitch3 = _mm256_setr_epi8(4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12);
@@ -2685,8 +2675,8 @@ void uavs3d_if_hor_ver_luma_w32_avx2(const pel *src, int i_src, pel *dst, int i_
         const int i_tmp8 = 32 * 8;
         const int i_tmp9 = 32 * 9;
         const int i_tmp10 = 32 * 10;
-
-        int shift = 12;
+        int col;
+        const int shift = 12;
         __m256i mAddOffset = _mm256_set1_epi32(1 << 11);
         __m128i mCoefy11 = _mm_set1_epi16(*(s16*)coef_y);
         __m128i mCoefy22 = _mm_set1_epi16(*(s16*)(coef_y + 2));
@@ -2850,7 +2840,6 @@ void uavs3d_if_hor_ver_luma_w32x_avx2(const pel *src, int i_src, pel *dst, int i
 {
 	ALIGNED_32(s16 tmp_res[(128 + 7) * 128]);
 	s16 *tmp = tmp_res;
-	int row, col;
     const int i_tmp = width;
     __m256i mVal1, mVal2, mVal;
     __m256i T0, T1, T2, T3, T4, T5, T6, T7, T8, T9;
@@ -2859,6 +2848,7 @@ void uavs3d_if_hor_ver_luma_w32x_avx2(const pel *src, int i_src, pel *dst, int i
 
 	//HOR
     {
+        int row, col;
         __m256i mSwitch1 = _mm256_setr_epi8(0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8);
         __m256i mSwitch2 = _mm256_setr_epi8(2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10);
         __m256i mSwitch3 = _mm256_setr_epi8(4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12);
@@ -2927,6 +2917,7 @@ void uavs3d_if_hor_ver_luma_w32x_avx2(const pel *src, int i_src, pel *dst, int i
         const int i_tmp10 = i_tmp5 << 1;
 
         int shift = 12;
+        int col;
         __m256i mAddOffset = _mm256_set1_epi32(1 << 11);
         __m128i mCoefy11 = _mm_set1_epi16(*(s16*)coef_y);
         __m128i mCoefy22 = _mm_set1_epi16(*(s16*)(coef_y + 2));

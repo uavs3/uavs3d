@@ -512,7 +512,6 @@ void uavs3d_if_ver_chroma_w16x_sse(const pel *src, int i_src, pel *dst, int i_ds
 	const int offset = 32;
 	const int shift = 6;
 	__m128i mAddOffset = _mm_set1_epi16(offset);
-	pel const *p;
 	__m128i coeff0 = _mm_set1_epi16(*(s16*)coeff);
 	__m128i coeff1 = _mm_set1_epi16(*(s16*)(coeff + 2));
 	__m128i mVal1, mVal2;
@@ -520,7 +519,7 @@ void uavs3d_if_ver_chroma_w16x_sse(const pel *src, int i_src, pel *dst, int i_ds
 	src -= i_src;
 
 	while (height--) {
-		p = src;
+		pel const *p = src;
         uavs3d_prefetch(src + 4 * i_src, _MM_HINT_NTA);
 		for (col = 0; col < width; col += 16) {
 			__m128i T01 = _mm_loadu_si128((__m128i*)(p));
@@ -739,7 +738,6 @@ void uavs3d_if_ver_luma_w16x_sse(const pel *src, int i_src, pel *dst, int i_dst,
 	int col;
 	const int offset = 32;
 	const int shift = 6;
-	pel const *p;
 	__m128i mAddOffset = _mm_set1_epi16(offset);
 	__m128i coeff0 = _mm_set1_epi16(*(s16*)coeff);
 	__m128i coeff1 = _mm_set1_epi16(*(s16*)(coeff + 2));
@@ -750,7 +748,7 @@ void uavs3d_if_ver_luma_w16x_sse(const pel *src, int i_src, pel *dst, int i_dst,
 	src -= 3 * i_src;
 
 	while (height--) {
-		p = src;
+		pel const *p = src;
         uavs3d_prefetch(src + 8 * i_src, _MM_HINT_NTA);
 		for (col = 0; col < width; col += 16) {
 			__m128i T01 = _mm_loadu_si128((__m128i*)(p));
@@ -811,7 +809,6 @@ void uavs3d_if_hor_ver_chroma_w8x_sse(const pel *src, int i_src, pel *dst, int i
 {
     int row, col;
     int shift;
-    s16 const *p;
     ALIGNED_16(s16 tmp_res[(64 + 3) * 64*2]);
     s16 *tmp = tmp_res;
     const int i_tmp = width;
@@ -856,7 +853,7 @@ void uavs3d_if_hor_ver_chroma_w8x_sse(const pel *src, int i_src, pel *dst, int i
 	coeff1_ver = _mm_cvtepi8_epi16(coeff1_ver);
 		
 	while (height--) {
-		p = tmp;
+        s16 const *p = tmp;
 		for (col = 0; col < width; col += 8) {
 			__m128i T00 = _mm_load_si128((__m128i*)(p));
 			__m128i T10 = _mm_load_si128((__m128i*)(p + i_tmp));
@@ -1411,7 +1408,6 @@ void uavs3d_if_hor_ver_luma_w8x_sse(const pel *src, int i_src, pel *dst, int i_d
 {
     int row, col;
     int shift;
-    s16 const *p;
 
     ALIGNED_16(s16 tmp_res[(128 + 7) * 128]);
     s16 *tmp = tmp_res;
@@ -1473,7 +1469,7 @@ void uavs3d_if_hor_ver_luma_w8x_sse(const pel *src, int i_src, pel *dst, int i_d
     mCoefy4_ver = _mm_cvtepi8_epi16(mCoefy4_ver);
 
     while (height--) {
-        p = tmp;
+        s16 const *p = tmp;
         for (col = 0; col < width; col += 8) {
             __m128i T00 = _mm_load_si128((__m128i*)(p));
             __m128i T10 = _mm_load_si128((__m128i*)(p + i_tmp));

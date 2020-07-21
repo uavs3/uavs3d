@@ -250,7 +250,7 @@ static void uavs3d_always_inline com_mv_rounding_affine(s32 hor, s32 ver, s32 * 
     }
 }
 
-static void uavs3d_always_inline check_umve_motion_availability(int scup, int cu_width, int cu_height, int i_scu, int neighbor[NUM_SPATIAL_MV], int valid[NUM_SPATIAL_MV], com_scu_t * map_scu, s16(*map_mv)[REFP_NUM][MV_D], s8(*map_refi)[REFP_NUM])
+static void uavs3d_always_inline check_umve_motion_availability(int scup, int cu_width, int cu_height, int i_scu, int neighbor[5], int valid[5], com_scu_t * map_scu, s16(*map_mv)[REFP_NUM][MV_D], s8(*map_refi)[REFP_NUM])
 {
     int cu_width_in_scu = cu_width >> MIN_CU_LOG2;
     int cu_height_in_scu = cu_height >> MIN_CU_LOG2;
@@ -985,7 +985,6 @@ static int get_affine_merge_candidate(com_core_t *core, s8 mrg_list_refi[REFP_NU
     int scup = core->cu_scup;
     com_map_t *map = &core->map;
     com_seqh_t *seqhdr = core->seqhdr;
-    com_ref_pic_t(*refp)[REFP_NUM] = core->refp;
     int i_scu = seqhdr->i_scu;
     int lidx, i, k;
     int cu_width = core->cu_width;
@@ -1112,6 +1111,7 @@ static int get_affine_merge_candidate(com_core_t *core, s8 mrg_list_refi[REFP_NU
         int neb_addr_rb = scup + i_scu * (cu_height_in_scu - 1) + (cu_width_in_scu - 1);
         int scu_y;
         int scup_co = get_colocal_scup(neb_addr_rb, i_scu, seqhdr->pic_width_in_scu, seqhdr->pic_height_in_scu, &scu_y);
+        com_ref_pic_t(*refp)[REFP_NUM] = core->refp;
 
         if (core->pichdr->slice_type == SLICE_B) {
             uavs3d_check_ref_avaliable(refp[0][REFP_1].pic, scu_y << MIN_CU_LOG2);

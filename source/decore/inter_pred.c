@@ -486,10 +486,10 @@ void uavs3d_always_inline com_affine_mc_chroma(com_core_t *core, pel *dstc, int 
     int max_posx = (seqhdr->pic_width  + 4) >> 1;
     int max_posy = (seqhdr->pic_height + 4) >> 1;
     int i_asb_mv = cu_width >> 2;
-    s32(*asb_mv1)[MV_D] = asb_mv0 + i_asb_mv;
     int i_src = ref_pic->stride_chroma;
 
     if (sub_blk_size == 4) {
+        s32(*asb_mv1)[MV_D] = asb_mv0 + i_asb_mv;
         for (h = 0; h < cu_height; h += 8) {
             int base_y = (y + h) << 4;
             for (w = 0; w < cu_width; w += 8, asb_mv0 += 2, asb_mv1 += 2) {
