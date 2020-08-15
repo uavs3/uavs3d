@@ -211,6 +211,13 @@ typedef struct uavs3d_com_seqh_t {
 
     /* alf map */
     unsigned char *alf_idx_map;
+
+    /* hdr info */
+    unsigned char colour_description;
+    unsigned char colour_primaries;
+    unsigned char transfer_characteristics;
+    unsigned char matrix_coefficients;
+
 } com_seqh_t;
 
 #define FRAME_MAX_PLANES 3

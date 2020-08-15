@@ -262,15 +262,17 @@ static int user_data(com_pic_header_t *pichdr, com_bs_t * bs)
     return RET_OK;
 }
 
-static int sequence_display_extension(com_bs_t * bs)
+static int sequence_display_extension(com_bs_t * bs, com_seqh_t *seqhdr)
 {
     dec_bs_read(bs, 3, 0, COM_UINT32_MAX);             // video_format             u(3)
     dec_bs_read1(bs, -1);                              // sample_range             u(1)
-    int colour_description = dec_bs_read1(bs, -1);     // colour_description       u(1)
-    if (colour_description) {                          
-        dec_bs_read(bs, 8, 0, COM_UINT32_MAX);         // colour_primaries         u(8)
-        dec_bs_read(bs, 8, 0, COM_UINT32_MAX);         // transfer_characteristics u(8)
-        dec_bs_read(bs, 8, 0, COM_UINT32_MAX);         // matrix_coefficients      u(8)
+
+    seqhdr->colour_description = dec_bs_read1(bs, -1);     // colour_description       u(1)
+
+    if (seqhdr->colour_description) {
+        seqhdr->colour_primaries         = dec_bs_read(bs, 8, 0, COM_UINT32_MAX);   // colour_primaries         u(8)
+        seqhdr->transfer_characteristics = dec_bs_read(bs, 8, 0, COM_UINT32_MAX);   // transfer_characteristics u(8)
+        seqhdr->matrix_coefficients      = dec_bs_read(bs, 8, 0, COM_UINT32_MAX);   // matrix_coefficients      u(8)
     }                                                  
     dec_bs_read(bs, 14, 0, COM_UINT32_MAX);            // display_horizontal_size  u(14)
     dec_bs_read1(bs, 1); //marker_bit                  
@@ -460,7 +462,7 @@ static int extension_data(com_bs_t * bs, com_seqh_t *seqhdr, com_pic_header_t *p
         if (i == 0) {
             int ret = dec_bs_read(bs, 4, 0, COM_UINT32_MAX);
             if (ret == 2) {
-                sequence_display_extension(bs);
+                sequence_display_extension(bs, seqhdr);
             } else if (ret == 3) {
                 temporal_scalability_extension(bs);
             } else if (ret == 4) {
