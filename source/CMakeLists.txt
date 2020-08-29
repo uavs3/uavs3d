@@ -1,19 +1,79 @@
 
 set(LIBNAME uavs3d)
 
+# check cpu
+if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "AMD64" OR
+   "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
+  if(${CMAKE_SIZEOF_VOID_P} EQUAL 4)
+    set(UAVS3D_TARGET_CPU "x86")
+  elseif(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+    set(UAVS3D_TARGET_CPU "x86_64")
+  else()
+    message(FATAL_ERROR
+              " Unexpected pointer size ${CMAKE_SIZEOF_VOID_P} for ${CMAKE_SYSTEM_PROCESSOR}\n")
+  endif()
+elseif("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "i386" OR
+       "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86")
+  set(UAVS3D_TARGET_CPU "x86")
+elseif("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "aarch64")
+  set(UAVS3D_TARGET_CPU "arm64")
+elseif("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "^arm")
+  set(UAVS3D_TARGET_CPU "armv7")
+else()
+  message(WARNING "unsupported architecture: ${CMAKE_SYSTEM_PROCESSOR}\n")
+  set(UAVS3D_TARGET_CPU "generic")
+endif()
+
 # add source
 aux_source_directory(./decoder DIR_UAVS3D_SRC)
 aux_source_directory(./decore DIR_UAVS3D_CORE)
-aux_source_directory(./decore/sse DIR_X86_SRC)
-aux_source_directory(./decore/avx2 DIR_X86_256_SRC)
 
 list(APPEND DIR_UAVS3D_SRC ${DIR_UAVS3D_CORE})
 
 include_directories("decore")
-
 set_source_files_properties(${DIR_UAVS3D_SRC} PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -fPIC -std=c99 -O3")
-set_source_files_properties(${DIR_X86_SRC} PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -fPIC -std=c99 -O3 -msse4.2")
-set_source_files_properties(${DIR_X86_256_SRC} PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -fPIC -std=c99 -O3 -mavx2")
+set(UAVS3D_ASM_FILES "")
+
+if("${UAVS3D_TARGET_CPU}" MATCHES "x86" OR 
+   "${UAVS3D_TARGET_CPU}" MATCHES "x86_64")
+  aux_source_directory(./decore/sse DIR_X86_SRC)
+  aux_source_directory(./decore/avx2 DIR_X86_256_SRC)
+  set_source_files_properties(${DIR_X86_SRC} PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -fPIC -std=c99 -O3 -msse4.2")
+  set_source_files_properties(${DIR_X86_256_SRC} PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -fPIC -std=c99 -O3 -mavx2")
+
+  list(APPEND UAVS3D_ASM_FILES ${DIR_X86_SRC})
+  list(APPEND UAVS3D_ASM_FILES ${DIR_X86_256_SRC})
+elseif("${UAVS3D_TARGET_CPU}" MATCHES "armv7")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/armv7.c")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/alf_armv7.S")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/deblock_armv7.S")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/def_armv7.S")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/inter_pred_armv7.S")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/intra_pred_armv7.S")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/dct2_armv7.S")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/itrans_dct8_dst7_armv7.S")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/pixel_armv7.S")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/sao_armv7.c")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/sao_kernel_armv7.S")
+
+  enable_language(ASM)
+elseif("${UAVS3D_TARGET_CPU}" MATCHES "arm64")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/arm64.c")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/alf_arm64.S")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/deblock_arm64.S")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/def_arm64.S")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/inter_pred_arm64.S")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/intra_pred_arm64.S")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/intra_pred_chroma_arm64.S")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/itrans_arm64.c")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/itrans_dct2_arm64.S")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/itrans_dct8_dst7_arm64.S")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/pixel_arm64.S")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/sao_arm64.c")
+  list(APPEND UAVS3D_ASM_FILES "./decore/arm64/sao_kernel_arm64.S")
+
+  enable_language(ASM)
+endif()
 
 # get version
 set (CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
@@ -30,6 +90,7 @@ endfunction()
 extract_version_string("${CONFIG_DIR}/version.h" uavs3d_version)
 MESSAGE(STATUS "uavs3d version \t\t: ${uavs3d_version}")
 
+MESSAGE(STATUS "Target CPU\t\t\t: ${UAVS3D_TARGET_CPU}")
 # pkg-config
 find_package(Threads REQUIRED)
 set(prefix "${CMAKE_INSTALL_PREFIX}")
@@ -65,7 +126,7 @@ MESSAGE(STATUS "BUILD_SHARED_LIBS \t\t: true")
 else()
 MESSAGE(STATUS "BUILD_SHARED_LIBS \t\t: false")
 endif()
-add_library(${LIBNAME} ${DIR_UAVS3D_SRC} ${DIR_X86_256_SRC} ${DIR_X86_SRC})
+add_library(${LIBNAME} ${DIR_UAVS3D_SRC} ${UAVS3D_ASM_FILES})
 
 target_link_libraries(${LIBNAME} m)
 if(CMAKE_USE_PTHREADS_INIT)

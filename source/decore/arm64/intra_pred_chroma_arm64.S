@@ -555,7 +555,7 @@ intra_pred_dc_uv_fillblock_w8:
     b   intra_pred_dc_uv_end
 
 intra_pred_dc_uv_fillblock_w16:
-    mov v1.8h, v0.8h
+    mov v1.16b, v0.16b
 intra_pred_dc_uv_fillblock_w16_y:
     st1 {v0.8h, v1.8h}, [x1], x2  // store dst[x]
     st1 {v0.8h, v1.8h}, [x1], x2
@@ -570,9 +570,9 @@ intra_pred_dc_uv_fillblock_w32x:
     cmp w3, #64
     beq intra_pred_dc_uv_fillblock_w64
 
-    mov v1.8h, v0.8h
-    mov v2.8h, v0.8h
-    mov v3.8h, v0.8h
+    mov v1.16b, v0.16b
+    mov v2.16b, v0.16b
+    mov v3.16b, v0.16b
 intra_pred_dc_uv_fillblock_w32_y:
     st1 {v0.8h, v1.8h, v2.8h, v3.8h}, [x1], x2  // store dst[x]
     st1 {v0.8h, v1.8h, v2.8h, v3.8h}, [x1], x2
@@ -585,9 +585,9 @@ intra_pred_dc_uv_fillblock_w32_y:
 intra_pred_dc_uv_fillblock_w64:
 
     sub x2, x2, #64
-    mov v1.8h, v0.8h
-    mov v2.8h, v0.8h
-    mov v3.8h, v0.8h
+    mov v1.16b, v0.16b
+    mov v2.16b, v0.16b
+    mov v3.16b, v0.16b
 intra_pred_dc_uv_fillblock_w64_y:
     st1 {v0.8h, v1.8h, v2.8h, v3.8h}, [x1], #64
     st1 {v0.8h, v1.8h, v2.8h, v3.8h}, [x1], x2

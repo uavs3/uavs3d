@@ -1809,9 +1809,9 @@ if_hor_ver_chroma_w8_loop_y:
     smlal  v30.4s, v22.4h, v7.h[3]
     smlal2 v31.4s, v22.8h, v7.h[3]
 
-    mov v16.2d, v20.2d
-    mov v17.2d, v21.2d
-    mov v18.2d, v22.2d
+    mov v16.16b, v20.16b
+    mov v17.16b, v21.16b
+    mov v18.16b, v22.16b
 
     rshrn  v24.4h, v24.4s, #12
     rshrn2 v24.8h, v25.4s, #12
@@ -2553,10 +2553,10 @@ if_hor_ver_luma_w4_loop_y:
     smlal  v29.4s, v21.4h, v8.h[7]
     smlal2 v30.4s, v21.8h, v8.h[7]
 
-    mov v16.2d, v18.2d
-    mov v17.2d, v19.2d
-    mov v18.2d, v20.2d
-    mov v19.2d, v21.2d
+    mov v16.16b, v18.16b
+    mov v17.16b, v19.16b
+    mov v18.16b, v20.16b
+    mov v19.16b, v21.16b
 
     rshrn v27.4h, v27.4s, #12
     rshrn v28.4h, v28.4s, #12

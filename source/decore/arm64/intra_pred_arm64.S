@@ -2996,12 +2996,12 @@ intra_pred_bi_ipf_end:
 //    const s8 *flt_coef_hor, const s8 *flt_coef_ver, int w, int h, int bit_depth)
 //src->x0, dst->x1, i_dst->x2, flt_range_hor->x3, flt_range_ver->x4, flt_coef_hor->x5, flt_coef_ver->x6, w->x7
 function uavs3d_intra_pred_ipf_arm64
-#if defined(__ANDROID__)
-    ldr     w8, [sp]                // w8 = h
-    ldr     w9, [sp, #8]            // w9 = bit_depth
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldr     w8, [sp]
     ldr     w9, [sp, #4]
+#else
+    ldr     w8, [sp]                // w8 = h
+    ldr     w9, [sp, #8]            // w9 = bit_depth
 #endif
     add x0, x0, #1                  // p_top = src + 1
 

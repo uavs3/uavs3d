@@ -35,21 +35,20 @@
  * For more information, contact us at rgwang@pkusz.edu.cn.
  **************************************************************************************/
 
-#if defined(__ANDROID__)
-.macro function name
-      .global \name
-      .hidden \name
-      .type   \name, %function
-\name:
-.endm
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
 .macro function name
       .text
       .align 4
       .global _\name
 _\name:
 .endm
-
+#else
+.macro function name
+      .global \name
+      .hidden \name
+      .type   \name, %function
+\name:
+.endm
 #endif
 
 #define COMPILE_10BIT 0

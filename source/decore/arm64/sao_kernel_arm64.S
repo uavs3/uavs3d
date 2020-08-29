@@ -451,10 +451,10 @@ loop_x_eo_90_chroma_end:
  ************************************************************************************************************************************/
 function uavs3d_sao_eo_135_arm64
     // get start_x_r0 and end_x_r0
-#if defined(__ANDROID__)
-    ldp x8, x9, [sp]
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp w8, w9, [sp]
+#else
+    ldp x8, x9, [sp]
 #endif
     sxtw x8, w8                         // start_x_r0
     sxtw x9, w9                         // end_x_r0
@@ -537,10 +537,10 @@ test_loop_x_eo_135_end_r0:
 
     // ------- middle rows -------
     // get param
-#if defined(__ANDROID__)
-    ldp x7, x8, [sp, #16]
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp w7, w8, [sp, #8]
+#else
+    ldp x7, x8, [sp, #16]
 #endif
     sxtw x7, w7                         // start_x_r
     sxtw x8, w8                         // end_x_r
@@ -613,10 +613,10 @@ test_loop_x_eo_135_end_r:
     bgt test_loop_y_eo_135_r
 
 // ------- last row -------
-#if defined(__ANDROID__)
-    ldp x6, x7, [sp, #32]
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp w6, w7, [sp, #16]
+#else
+    ldp x6, x7, [sp, #32]
 #endif
     sxtw x6, w6                         // start_x_rn
     sxtw x7, w7                         // end_x_rn
@@ -691,10 +691,10 @@ test_loop_x_eo_135_end_rn:
  ************************************************************************************************************************************/
 function uavs3d_sao_eo_135_chroma_arm64
 
-#if defined(__ANDROID__)
-    ldp     x8, x9, [sp]
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp     w8, w9, [sp]
+#else
+    ldp     x8, x9, [sp]
 #endif
     sxtw    x8, w8                          // start_x_r0
     sxtw    x9, w9                          // end_x_r0
@@ -793,10 +793,10 @@ loop_x_eo_135_chroma_end_r0:
     add     x1, x1, x3                      //-- dst+=dst_stride
 
 //--------------------------------middle rows--------------------------------
-#if defined(__ANDROID__)
-    ldp     x7 , x8, [sp, #16]               //-- x7=start_x_r; x8=end_x_r
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp     w7 , w8, [sp, #8]               //-- x7=start_x_r; x8=end_x_r
+#else
+    ldp     x7 , x8, [sp, #16]              //-- x7=start_x_r; x8=end_x_r
 #endif
     sxtw    x7 , w7
     sxtw    x8 , w8
@@ -886,10 +886,10 @@ loop_x_eo_135_chroma_end_r:
     bgt     loop_y_eo_135_chroma_r
 
 //---------------------------------last row--------------------------------
-#if defined(__ANDROID__)
-    ldp     x6, x7, [sp, #32]              //-- x6=start_x_rn; x7=end_x_rn
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp     w6, w7, [sp, #16]              //-- x6=start_x_rn; x7=end_x_rn
+#else
+    ldp     x6, x7, [sp, #32]              //-- x6=start_x_rn; x7=end_x_rn
 #endif
     sxtw    x7, w7
     sxtw    x6, w6
@@ -979,10 +979,10 @@ loop_x_eo_135_chroma_end_rn:
  *  end_x_r0->x8, start_x_r->x9, end_x_r->x10, start_x_rn->x11, end_x_rn->x12
  ************************************************************************************************************************************/
 function uavs3d_sao_eo_45_arm64
-#if defined(__ANDROID__)
-    ldp x8, x9, [sp]
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp w8, w9, [sp]
+#else
+    ldp x8, x9, [sp]
 #endif
     sxtw x8, w8                         // start_x_r0
     sxtw x9, w9                         // end_x_r0
@@ -1064,10 +1064,10 @@ test_loop_x_eo_45_end_r0:
 
     // ------- middle rows -------
     // get param
-#if defined(__ANDROID__)
-    ldp x7, x8, [sp, #16]               // x7 start_x_r; x8 end_x_r
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp w7, w8, [sp, #8]                // x7 start_x_r; x8 end_x_r
+#else
+    ldp x7, x8, [sp, #16]               // x7 start_x_r; x8 end_x_r
 #endif
     sxtw x7, w7
     sxtw x8, w8
@@ -1141,10 +1141,10 @@ test_loop_x_eo_45_end_r:
     bgt test_loop_y_eo_45_r
 
     // ------- last row -------
-#if defined(__ANDROID__)
-    ldp x6, x7, [sp, #32]               // $x6 start_x_rn; $x7 end_x_rn
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp w6, w7, [sp, #16]               // $x6 start_x_rn; $x7 end_x_rn
+#else
+    ldp x6, x7, [sp, #32]               // $x6 start_x_rn; $x7 end_x_rn
 #endif
     sxtw x6, w6
     sxtw x7, w7
@@ -1217,10 +1217,10 @@ ret
  *  end_x_r0->x8, start_x_r->x9, end_x_r->x10, start_x_rn->x11, end_x_rn->x12
  ************************************************************************************************************************************/
 function uavs3d_sao_eo_45_chroma_arm64
-#if defined(__ANDROID__)
-    ldp     x8, x9, [sp]
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp     w8, w9, [sp]
+#else
+    ldp     x8, x9, [sp]
 #endif
     sxtw    x8, w8                          // start_x_r0
     sxtw    x9, w9                          // end_x_r0
@@ -1315,10 +1315,10 @@ loop_x_eo_45_chroma_end_r0:
     add     x1, x1, x3                      //-- dst+=dst_stride
 
 //--------------------------------middle rows--------------------------------
-#if defined(__ANDROID__)
-    ldp     x7 , x8, [sp, #16]              //-- x7=start_x_r; x8=end_x_r
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp     w7 , w8, [sp, #8]               //-- x7=start_x_r; x8=end_x_r
+#else
+    ldp     x7 , x8, [sp, #16]              //-- x7=start_x_r; x8=end_x_r
 #endif
     sxtw    x7 , w7
     sxtw    x8 , w8
@@ -1405,10 +1405,10 @@ loop_x_eo_45_chroma_end_r:
     bgt    loop_y_eo_45_chroma_r
 
 //---------------------------------last row--------------------------------
-#if defined(__ANDROID__)
-    ldp     x6 , x7, [sp, #32]              //-- x6=start_x_rn; x7=end_x_rn
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp     w6 , w7, [sp, #16]              //-- x6=start_x_rn; x7=end_x_rn
+#else
+    ldp     x6 , x7, [sp, #32]              //-- x6=start_x_rn; x7=end_x_rn
 #endif
     sxtw    x7 , w7
     sxtw    x6 , w6
@@ -2221,10 +2221,10 @@ loop_x_eo_90_chroma_end:
  *  src->x0, dst->x1, src_stride->x2, dst_stride->x3, offset->x4, mask->x5, mb_height->x6, bit_depth->x7
  ************************************************************************************************************************************/
 function uavs3d_sao_eo_135_arm64
-#if defined(__ANDROID__)
-    ldp x8, x9, [sp]                // start_x_r0 and end_x_r0
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp w8, w9, [sp]
+#else
+    ldp x8, x9, [sp]                // start_x_r0 and end_x_r0
 #endif
 
     sxtw x8, w8                     // start_x_r0
@@ -2336,10 +2336,10 @@ test_loop_x_eo_135_end_r0:
 
     // ------- middle rows -------
     // get param
-#if defined(__ANDROID__)
-    ldp x7, x8, [sp, #16]
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp w7, w8, [sp, #8]
+#else
+    ldp x7, x8, [sp, #16]
 #endif
     sxtw x7, w7                         // x7 start_x_r
     sxtw x8, w8                         // x8 end_x_r
@@ -2431,10 +2431,10 @@ test_loop_x_eo_135_end_r:
     bgt test_loop_y_eo_135_r
 
 // ------- last row -------
-#if defined(__ANDROID__)
-    ldp x6, x7, [sp, #32]
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp w6, w7, [sp, #16]
+#else
+    ldp x6, x7, [sp, #32]
 #endif
     sxtw x6, w6                         // start_x_rn
     sxtw x7, w7                         // end_x_rn
@@ -2527,10 +2527,10 @@ test_loop_x_eo_135_end_rn:
  *  src->x0, dst->x1, src_stride->x2, dst_stride->x3, offset->x4, mask->x5, mb_height->x6, bit_depth->x7
  ************************************************************************************************************************************/
 function uavs3d_sao_eo_135_chroma_arm64
-#if defined(__ANDROID__)
-    ldp x8, x9, [sp]                        // start_x_r0 and end_x_r0
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp w8, w9, [sp]
+#else
+    ldp x8, x9, [sp]                        // start_x_r0 and end_x_r0
 #endif
 
     mov     w13, #1
@@ -2636,10 +2636,10 @@ loop_x_eo_135_chroma_end_r0:
     add     x1, x1, x3                      //-- dst+=dst_stride
 
 //--------------------------------middle rows--------------------------------
-#if defined(__ANDROID__)
-    ldp     x7 , x8, [sp, #16]              //-- x7=start_x_r; x8=end_x_r
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp     w7 , w8, [sp, #8]               //-- x7=start_x_r; x8=end_x_r
+#else
+    ldp     x7 , x8, [sp, #16]              //-- x7=start_x_r; x8=end_x_r
 #endif
     sxtw    x7 , w7
     sxtw    x8 , w8
@@ -2730,10 +2730,10 @@ loop_x_eo_135_chroma_end_r:
     bgt     loop_y_eo_135_chroma_r
 
 //---------------------------------last row--------------------------------
-#if defined(__ANDROID__)
-    ldp     x6, x7, [sp, #32]              //-- x6=start_x_rn; x7=end_x_rn
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp     w6, w7, [sp, #16]              //-- x6=start_x_rn; x7=end_x_rn
+#else
+    ldp     x6, x7, [sp, #32]              //-- x6=start_x_rn; x7=end_x_rn
 #endif
     sxtw    x7, w7
     sxtw    x6, w6
@@ -2822,10 +2822,10 @@ loop_x_eo_135_chroma_end_rn:
  *  src->x0, dst->x1, src_stride->x2, dst_stride->x3, offset->x4, mask->x5, mb_height->x6, bit_depth->x7
  ************************************************************************************************************************************/
 function uavs3d_sao_eo_45_arm64
-#if defined(__ANDROID__)
-    ldp x8, x9, [sp]                // start_x_r0 and end_x_r0
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp w8, w9, [sp]
+#else
+    ldp x8, x9, [sp]                // start_x_r0 and end_x_r0
 #endif
 
     mov w12, #1
@@ -2936,10 +2936,10 @@ test_loop_x_eo_45_end_r0:
 
     // ------- middle rows -------
     // get param
-#if defined(__ANDROID__)
-    ldp x7, x8, [sp, #16]               // x7 start_x_r; x8 end_x_r
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp w7, w8, [sp, #8]                // x7 start_x_r; x8 end_x_r
+#else
+    ldp x7, x8, [sp, #16]               // x7 start_x_r; x8 end_x_r
 #endif
     sxtw x7, w7
     sxtw x8, w8
@@ -3031,10 +3031,10 @@ test_loop_x_eo_45_end_r:
     bgt test_loop_y_eo_45_r
 
     // ------- last row -------
-#if defined(__ANDROID__)
-    ldp x6, x7, [sp, #32]
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp w6, w7, [sp, #16]
+#else
+    ldp x6, x7, [sp, #32]
 #endif
     sxtw x6, w6                         // start_x_rn
     sxtw x7, w7                         // end_x_rn
@@ -3126,10 +3126,10 @@ test_loop_x_eo_45_end_rn:
  *  src->x0, dst->x1, src_stride->x2, dst_stride->x3, offset->x4, mask->x5, mb_height->x6, bit_depth->x7
  ************************************************************************************************************************************/
 function uavs3d_sao_eo_45_chroma_arm64
-#if defined(__ANDROID__)
-    ldp x8, x9, [sp]                        // start_x_r0 and end_x_r0
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp w8, w9, [sp]
+#else
+    ldp x8, x9, [sp]                        // start_x_r0 and end_x_r0
 #endif
 
     mov     w12, #1
@@ -3236,10 +3236,10 @@ loop_x_eo_45_chroma_end_r0:
     add     x1, x1, x3                      //-- dst+=dst_stride
 
 //--------------------------------middle rows--------------------------------
-#if defined(__ANDROID__)
-    ldp     x7 , x8, [sp, #16]              //-- x7=start_x_r; x8=end_x_r
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp     w7 , w8, [sp, #8]               //-- x7=start_x_r; x8=end_x_r
+#else
+    ldp     x7 , x8, [sp, #16]              //-- x7=start_x_r; x8=end_x_r
 #endif
     sxtw    x7 , w7
     sxtw    x8 , w8
@@ -3328,10 +3328,10 @@ loop_x_eo_45_chroma_end_r:
     bgt    loop_y_eo_45_chroma_r
 
 //---------------------------------last row--------------------------------
-#if defined(__ANDROID__)
-    ldp     x6 , x7, [sp, #32]              //-- x6=start_x_rn; x7=end_x_rn
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     ldp     w6 , w7, [sp, #16]              //-- x6=start_x_rn; x7=end_x_rn
+#else
+    ldp     x6 , x7, [sp, #32]              //-- x6=start_x_rn; x7=end_x_rn
 #endif
     sxtw    x7 , w7
     sxtw    x6 , w6
