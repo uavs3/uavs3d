@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.1)
 project(uavs3d)
 
 set(CMAKE_C_STANDARD 99)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 aux_source_directory(./test DIR_SRC_TEST)
 
