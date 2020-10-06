@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 
 project(uavs3d)
 
@@ -12,4 +12,3 @@ add_executable(uavs3dec ${DIR_SRC_TEST})
 target_link_libraries(uavs3dec m)
 target_link_libraries(uavs3dec uavs3d)
 #target_link_libraries(uavs3dec dl)
-
