@@ -31,15 +31,14 @@ aux_source_directory(./decore DIR_UAVS3D_CORE)
 list(APPEND DIR_UAVS3D_SRC ${DIR_UAVS3D_CORE})
 
 include_directories("decore")
-set_source_files_properties(${DIR_UAVS3D_SRC} PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -fPIC -std=c99 -O3")
 set(UAVS3D_ASM_FILES "")
 
-if("${UAVS3D_TARGET_CPU}" MATCHES "x86" OR 
+if("${UAVS3D_TARGET_CPU}" MATCHES "x86" OR
    "${UAVS3D_TARGET_CPU}" MATCHES "x86_64")
   aux_source_directory(./decore/sse DIR_X86_SRC)
   aux_source_directory(./decore/avx2 DIR_X86_256_SRC)
-  set_source_files_properties(${DIR_X86_SRC} PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -fPIC -std=c99 -O3 -msse4.2")
-  set_source_files_properties(${DIR_X86_256_SRC} PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -fPIC -std=c99 -O3 -mavx2")
+  set_source_files_properties(${DIR_X86_SRC} PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -msse4.2")
+  set_source_files_properties(${DIR_X86_256_SRC} PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -mavx2")
 
   list(APPEND UAVS3D_ASM_FILES ${DIR_X86_SRC})
   list(APPEND UAVS3D_ASM_FILES ${DIR_X86_256_SRC})
@@ -137,4 +136,3 @@ endif()
 install(TARGETS uavs3d LIBRARY DESTINATION ${CMAKE_INSTALL_LIB_DIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIB_DIR})
 install(FILES decoder/uavs3d.h DESTINATION ${CMAKE_INSTALL_INCLUDE_DIR})
 install(FILES ${CONFIG_DIR}/${LIBNAME}.pc DESTINATION ${CMAKE_INSTALL_PKGCONFIG_DIR})
-
