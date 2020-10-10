@@ -45,9 +45,8 @@
 
 #include "modules.h"
 
-#ifdef _WIN32
-
-#ifndef _WIN64
+#if __x86_64__
+#elif	__i386__
 #include <stdint.h>
 static inline int64_t _mm_extract_epi64(__m128i a, const int imm8) {
     return imm8 ? ((int64_t)_mm_extract_epi16(a, 7) << 48) |
@@ -57,8 +56,6 @@ static inline int64_t _mm_extract_epi64(__m128i a, const int imm8) {
                       ((int64_t)_mm_extract_epi16(a, 2) << 32) |
                       (_mm_extract_epi16(a, 1) << 16) | _mm_extract_epi16(a, 0);
 }
-#endif
-
 #endif
 
 ALIGNED_32(extern pel uavs3d_simd_mask[15][16]);
