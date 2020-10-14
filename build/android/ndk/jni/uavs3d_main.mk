@@ -28,28 +28,31 @@ uavs3d_srcs_c   += $(SRC_PATH)/decoder/dec_util.c
 LOCAL_CFLAGS    += -O3 -fPIC -std=gnu99 -I../../../source/decore
 
 ifeq ($(TARGET_ARCH),arm)
-	# build armv7a
-	LOCAL_CFLAGS 	+= -mfpu=neon
-	include $(LOCAL_PATH)/uavs3d_armv7a.mk
+    ifeq ($(TARGET_ARCH_ABI), armeabi-v7a)
+        # build armv7a
+        LOCAL_CFLAGS += -mfpu=neon -D_armv7a
+        include $(LOCAL_PATH)/uavs3d_armv7a.mk
+    endif
 endif
 
 ifeq ($(TARGET_ARCH),arm64)
-	# build arm64
-	include $(LOCAL_PATH)/uavs3d_arm64.mk
+    # build arm64
+    LOCAL_CFLAGS += -D_arm64
+    include $(LOCAL_PATH)/uavs3d_arm64.mk
 endif
 
 ifeq ($(TARGET_ARCH),x86)
-	# build x86
-	LOCAL_CFLAGS 	+= -msse4.2 -mavx2
-	include $(LOCAL_PATH)/uavs3d_sse2.mk
-	include $(LOCAL_PATH)/uavs3d_avx2.mk
+    # build x86
+    LOCAL_CFLAGS += -msse4.2 -mavx2
+    include $(LOCAL_PATH)/uavs3d_sse2.mk
+    include $(LOCAL_PATH)/uavs3d_avx2.mk
 endif
 
 ifeq ($(TARGET_ARCH),x86_64)
-	# build x86_64
-	LOCAL_CFLAGS 	+= -msse4.2 -mavx2
-	include $(LOCAL_PATH)/uavs3d_sse2.mk
-	include $(LOCAL_PATH)/uavs3d_avx2.mk
+    # build x86_64
+    LOCAL_CFLAGS += -msse4.2 -mavx2
+    include $(LOCAL_PATH)/uavs3d_sse2.mk
+    include $(LOCAL_PATH)/uavs3d_avx2.mk
 endif
 
 LOCAL_SRC_FILES := $(uavs3d_srcs_c) $(uavs3d_srcs_arm) $(uavs3d_srcs_sse) $(uavs3d_srcs_avx) $(uavs3d_srcs_test)

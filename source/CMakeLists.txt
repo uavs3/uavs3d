@@ -55,6 +55,7 @@ elseif("${UAVS3D_TARGET_CPU}" MATCHES "armv7")
   list(APPEND UAVS3D_ASM_FILES "./decore/arm64/sao_armv7.c")
   list(APPEND UAVS3D_ASM_FILES "./decore/arm64/sao_kernel_armv7.S")
 
+  add_definitions(-D _armv7a)
   enable_language(ASM)
 elseif("${UAVS3D_TARGET_CPU}" MATCHES "arm64")
   list(APPEND UAVS3D_ASM_FILES "./decore/arm64/arm64.c")
@@ -71,6 +72,7 @@ elseif("${UAVS3D_TARGET_CPU}" MATCHES "arm64")
   list(APPEND UAVS3D_ASM_FILES "./decore/arm64/sao_arm64.c")
   list(APPEND UAVS3D_ASM_FILES "./decore/arm64/sao_kernel_arm64.S")
 
+  add_definitions(-D _arm64)
   enable_language(ASM)
 endif()
 
