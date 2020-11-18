@@ -44,7 +44,7 @@
 #if defined(_arm64) || (defined(__APPLE__) && defined(__arm64__))
 #define ENABLE_FUNCTION_C 1
 #define ENABLE_FUNCTION_ARM64 1
-#elif defined(_armv7) || (defined(__APPLE__) && defined(__ARM_NEON__))
+#elif defined(_armv7a) || (defined(__APPLE__) && defined(__ARM_NEON__))
 #define ENABLE_FUNCTION_C 1
 #define ENABLE_FUNCTION_ARM32 1
 #elif (defined(__WIN32__) || defined(_WIN32)) || (defined(__MACOSX__) || defined(macintosh) || defined(__linux__) || defined(__unix__)) && (defined(__i386__) || defined(__x86_64__) || defined(__AMD64__))
