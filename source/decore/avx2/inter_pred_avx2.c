@@ -134,9 +134,11 @@ void uavs3d_if_hor_chroma_w8_avx2(const pel *src, int i_src, pel *dst, int i_dst
 
     __m256i mCoefy1_hor = _mm256_set1_epi16(*(s16*)coeff);
     __m256i mCoefy2_hor = _mm256_set1_epi16(*(s16*)(coeff + 2));
-    __m256i mSwitch = _mm256_setr_epi8(0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7, 9, 0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7, 9);
-    __m256i mAddOffset = _mm256_set1_epi16(offset);
-    __m256i T0, T1, S0, S1, R0, R1, sum;
+    __m256i mSwitch0 = _mm256_setr_epi8(0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7, 9, 0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7, 9);
+    __m256i mSwitch1 = _mm256_setr_epi8(0+4, 2+4, 1+4, 3+4, 2+4, 4+4, 3+4, 5+4, 4+4, 6+4, 5+4, 7+4, 6+4, 8+4, 7+4, 9+4,
+                                        0+4, 2+4, 1+4, 3+4, 2+4, 4+4, 3+4, 5+4, 4+4, 6+4, 5+4, 7+4, 6+4, 8+4, 7+4, 9+4);
+    __m256i mAddShift = _mm256_set1_epi16(0x8000 >> shift);
+    __m256i T0, T1, S0, R0, R1, sum;
     __m128i s0, s1;
 
     src -= 2;
@@ -146,22 +148,19 @@ void uavs3d_if_hor_chroma_w8_avx2(const pel *src, int i_src, pel *dst, int i_dst
         s1 = _mm_loadu_si128((__m128i*)(src + i_src));
 
         S0 = _mm256_set_m128i(s1, s0);
-        S1 = _mm256_srli_si256(S0, 4);
 
-        R0 = _mm256_shuffle_epi8(S0, mSwitch);      // 4 rows s0 and s1 
-        R1 = _mm256_shuffle_epi8(S1, mSwitch);
+        R0 = _mm256_shuffle_epi8(S0, mSwitch0);      // 4 rows s0 and s1 
+        R1 = _mm256_shuffle_epi8(S0, mSwitch1);
 
         T0 = _mm256_maddubs_epi16(R0, mCoefy1_hor); // 4x4: s0*c0 + s1*c1 
         T1 = _mm256_maddubs_epi16(R1, mCoefy2_hor);
         sum = _mm256_add_epi16(T0, T1);
 
-        sum = _mm256_add_epi16(sum, mAddOffset);
-        sum = _mm256_srai_epi16(sum, shift);
+        sum = _mm256_mulhrs_epi16(sum, mAddShift);
 
         s0 = _mm_packus_epi16(_mm256_castsi256_si128(sum), _mm256_extracti128_si256(sum, 1));
-        s1 = _mm_srli_si128(s0, 8);
         _mm_storel_epi64((__m128i*)(dst), s0);
-        _mm_storel_epi64((__m128i*)(dst + i_dst), s1);
+        _mm_storeh_pi((__m64*)(dst + i_dst), _mm_castsi128_ps(s0));
 
         height -= 2;
         src += i_src << 1;
