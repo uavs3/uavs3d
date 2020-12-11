@@ -1055,7 +1055,6 @@ void uavs3d_alf_one_lcu_chroma_avx2(pel *dst, int i_dst, pel *src, int i_src, in
     int startPos = 0;
     int endPos = lcu_height;
     int xPosEnd = lcu_width << 1;
-    long long tmp[8];
 
     src += (startPos*i_src);
     dst += (startPos*i_dst);
@@ -1066,22 +1065,14 @@ void uavs3d_alf_one_lcu_chroma_avx2(pel *dst, int i_dst, pel *src, int i_src, in
     T00 = _mm256_unpacklo_epi16(C8, C8);
     T01 = _mm256_unpackhi_epi16(C8, C8);
 
-    tmp[0] = _mm256_extract_epi64(T00, 0);  // win32 compile error if C0 = _mm256_set1_epi64x(_mm256_extract_epi64(T00, 0));
-    tmp[1] = _mm256_extract_epi64(T00, 1);
-    tmp[2] = _mm256_extract_epi64(T00, 2);
-    tmp[3] = _mm256_extract_epi64(T00, 3);
-    tmp[4] = _mm256_extract_epi64(T01, 0);
-    tmp[5] = _mm256_extract_epi64(T01, 1);
-    tmp[6] = _mm256_extract_epi64(T01, 2);
-    tmp[7] = _mm256_extract_epi64(T01, 3);
-    C0 = _mm256_set1_epi64x(tmp[0]);
-    C1 = _mm256_set1_epi64x(tmp[1]);
-    C2 = _mm256_set1_epi64x(tmp[2]);
-    C3 = _mm256_set1_epi64x(tmp[3]);
-    C4 = _mm256_set1_epi64x(tmp[4]);
-    C5 = _mm256_set1_epi64x(tmp[5]);
-    C6 = _mm256_set1_epi64x(tmp[6]);
-    C7 = _mm256_set1_epi64x(tmp[7]);
+    C0 = _mm256_permute4x64_epi64(T00, 0x00);
+    C1 = _mm256_permute4x64_epi64(T00, 0x55);
+    C2 = _mm256_permute4x64_epi64(T00, 0xaa);
+    C3 = _mm256_permute4x64_epi64(T00, 0xff);
+    C4 = _mm256_permute4x64_epi64(T01, 0x00);
+    C5 = _mm256_permute4x64_epi64(T01, 0x55);
+    C6 = _mm256_permute4x64_epi64(T01, 0xaa);
+    C7 = _mm256_permute4x64_epi64(T01, 0xff);
     C8 = _mm256_set1_epi32((unsigned short)coef[16] + (((unsigned short)coef[17]) << 16));
     C8 = _mm256_unpacklo_epi16(C8, C8);
 
