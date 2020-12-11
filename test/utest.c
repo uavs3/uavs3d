@@ -465,7 +465,7 @@ int main(int argc, const char **argv)
     dec_cfg.log_level = 1;
     dec_cfg.frm_threads = 1;
 
-    if (argc < 2) {
+    if ((argc < 2) || !(argc % 2)) {
         log_level_0("Error config, please check arguments: \n");
         print_help();
         return -1;

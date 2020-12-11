@@ -55,25 +55,59 @@ void uavs3d_if_cpy_sse(const pel *src, int i_src, pel *dst, int i_dst, int width
 
 void uavs3d_if_cpy_w4_sse(const pel *src, int i_src, pel *dst, int i_dst, int width, int height)
 {
-     while (height) {
+    if (height < 4) {
         CP32(dst, src);
         CP32(dst + i_dst, src + i_src);
-        height -= 2;
-        src += i_src << 1;
-        dst += i_dst << 1;
+    }
+    else {
+        int i_src2 = i_src << 1;
+        int i_dst2 = i_dst << 1;
+        int i_src3 = i_src + i_src2;
+        int i_dst3 = i_dst + i_dst2;
+        int i_src4 = i_src << 2;
+        int i_dst4 = i_dst << 2;
+        while (height > 0) {
+            CP32(dst, src);
+            CP32(dst + i_dst, src + i_src);
+            CP32(dst + i_dst2, src + i_src2);
+            CP32(dst + i_dst3, src + i_src3);
+            height -= 4;
+            src += i_src4;
+            dst += i_dst4;
+        }
     }
 }
 
 void uavs3d_if_cpy_w8_sse(const pel *src, int i_src, pel *dst, int i_dst, int width, int height)
 {
-    int i_src2 = i_src << 1;
-    int i_dst2 = i_dst << 1;
-    while (height) {
-        CP64(dst, src);
-        CP64(dst + i_dst, src + i_src);
-        src += i_src2;
-        dst += i_dst2;
-        height -= 2;
+    if (height < 4) {
+        __m128i m0, m1;
+        m0 = _mm_loadl_epi64((const __m128i*)src);
+        m1 = _mm_loadl_epi64((const __m128i*)(src + i_src));
+        _mm_storel_epi64((__m128i*)dst, m0);
+        _mm_storel_epi64((__m128i*)(dst + i_dst), m1);
+    } else {
+        __m128i m0, m1, m2, m3;
+        int i_src2 = i_src << 1;
+        int i_dst2 = i_dst << 1;
+        int i_src3 = i_src + i_src2;
+        int i_dst3 = i_dst + i_dst2;
+        int i_src4 = i_src << 2;
+        int i_dst4 = i_dst << 2;
+        while (height) {
+            m0 = _mm_loadl_epi64((const __m128i*)src);
+            m1 = _mm_loadl_epi64((const __m128i*)(src + i_src));
+            m2 = _mm_loadl_epi64((const __m128i*)(src + i_src2));
+            m3 = _mm_loadl_epi64((const __m128i*)(src + i_src3));
+            height -= 4;
+            src += i_src4;
+
+            _mm_storel_epi64((__m128i*)dst, m0);
+            _mm_storel_epi64((__m128i*)(dst + i_dst), m1);
+            _mm_storel_epi64((__m128i*)(dst + i_dst2), m2);
+            _mm_storel_epi64((__m128i*)(dst + i_dst3), m3);
+            dst += i_dst4;
+        }
     }
 }
 

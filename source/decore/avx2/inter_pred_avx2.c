@@ -137,7 +137,7 @@ void uavs3d_if_hor_chroma_w8_avx2(const pel *src, int i_src, pel *dst, int i_dst
     __m256i mSwitch0 = _mm256_setr_epi8(0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7, 9, 0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7, 9);
     __m256i mSwitch1 = _mm256_setr_epi8(0+4, 2+4, 1+4, 3+4, 2+4, 4+4, 3+4, 5+4, 4+4, 6+4, 5+4, 7+4, 6+4, 8+4, 7+4, 9+4,
                                         0+4, 2+4, 1+4, 3+4, 2+4, 4+4, 3+4, 5+4, 4+4, 6+4, 5+4, 7+4, 6+4, 8+4, 7+4, 9+4);
-    __m256i mAddShift = _mm256_set1_epi16(0x8000 >> shift);
+    __m256i mAddOffset = _mm256_set1_epi16(offset);
     __m256i T0, T1, S0, R0, R1, sum;
     __m128i s0, s1;
 
@@ -146,6 +146,9 @@ void uavs3d_if_hor_chroma_w8_avx2(const pel *src, int i_src, pel *dst, int i_dst
     while (height > 0) {
         s0 = _mm_loadu_si128((__m128i*)(src));
         s1 = _mm_loadu_si128((__m128i*)(src + i_src));
+        src += i_src << 1;
+        uavs3d_prefetch(src, _MM_HINT_NTA);
+        uavs3d_prefetch(src + i_src, _MM_HINT_NTA);
 
         S0 = _mm256_set_m128i(s1, s0);
 
@@ -156,14 +159,14 @@ void uavs3d_if_hor_chroma_w8_avx2(const pel *src, int i_src, pel *dst, int i_dst
         T1 = _mm256_maddubs_epi16(R1, mCoefy2_hor);
         sum = _mm256_add_epi16(T0, T1);
 
-        sum = _mm256_mulhrs_epi16(sum, mAddShift);
+        sum = _mm256_add_epi16(sum, mAddOffset);
+        sum = _mm256_srai_epi16(sum, shift);
 
         s0 = _mm_packus_epi16(_mm256_castsi256_si128(sum), _mm256_extracti128_si256(sum, 1));
         _mm_storel_epi64((__m128i*)(dst), s0);
         _mm_storeh_pi((__m64*)(dst + i_dst), _mm_castsi128_ps(s0));
 
         height -= 2;
-        src += i_src << 1;
         dst += i_dst << 1;
     }
 }
@@ -183,9 +186,11 @@ void uavs3d_if_hor_chroma_w16_avx2(const pel *src, int i_src, pel *dst, int i_ds
     src -= 2;
 
     while (height) {
-        uavs3d_prefetch(src + i_src*2, _MM_HINT_NTA);
         S0 = _mm256_loadu_si256((__m256i*)(src));
         S1 = _mm256_loadu_si256((__m256i*)(src + i_src));
+        src += i_src << 1;
+        uavs3d_prefetch(src, _MM_HINT_NTA);
+        uavs3d_prefetch(src + i_src, _MM_HINT_NTA);
         S2 = _mm256_permute4x64_epi64(S0, 0x94);
         S3 = _mm256_permute4x64_epi64(S1, 0x94);
         R0 = _mm256_shuffle_epi8(S2, mSwitch1);
@@ -199,6 +204,8 @@ void uavs3d_if_hor_chroma_w16_avx2(const pel *src, int i_src, pel *dst, int i_ds
         sum0 = _mm256_add_epi16(T0, T1);
         sum1 = _mm256_add_epi16(T2, T3);
 
+        height -= 2;
+
         sum0 = _mm256_add_epi16(sum0, mAddOffset);
         sum1 = _mm256_add_epi16(sum1, mAddOffset);
         sum0 = _mm256_srai_epi16(sum0, shift);
@@ -206,8 +213,6 @@ void uavs3d_if_hor_chroma_w16_avx2(const pel *src, int i_src, pel *dst, int i_ds
         _mm_storeu_si128((__m128i*)(dst), _mm_packus_epi16(_mm256_castsi256_si128(sum0), _mm256_extracti128_si256(sum0, 1)));
         _mm_storeu_si128((__m128i*)(dst + i_dst), _mm_packus_epi16(_mm256_castsi256_si128(sum1), _mm256_extracti128_si256(sum1, 1)));
 
-        height -= 2;
-        src += i_src << 1;
         dst += i_dst << 1;
     }
 }
@@ -227,10 +232,10 @@ void uavs3d_if_hor_chroma_w32_avx2(const pel *src, int i_src, pel *dst, int i_ds
     src -= 2;
 
     while (height--) {
-        uavs3d_prefetch(src + i_src, _MM_HINT_NTA);
-
         S0 = _mm256_loadu_si256((__m256i*)(src));
         S1 = _mm256_loadu_si256((__m256i*)(src + 16));
+        uavs3d_prefetch(src + i_src, _MM_HINT_NTA);
+
         S2 = _mm256_permute4x64_epi64(S0, 0x94);
         S3 = _mm256_permute4x64_epi64(S1, 0x94);
         R0 = _mm256_shuffle_epi8(S2, mSwitch1);
@@ -307,59 +312,52 @@ void uavs3d_if_hor_luma_w4_avx2(const pel *src, int i_src, pel *dst, int i_dst, 
     const int offset = 32;
     const int shift = 6;
     __m256i mAddOffset = _mm256_set1_epi16(offset);
-    __m256i mSwitch1 = _mm256_setr_epi8(0, 1, 1, 2, 2, 3, 3, 4, 8, 9, 9, 10, 10, 11, 11, 12, 0, 1, 1, 2, 2, 3, 3, 4, 8, 9, 9, 10, 10, 11, 11, 12);
-    __m256i mSwitch2 = _mm256_setr_epi8(2, 3, 3, 4, 4, 5, 5, 6, 10, 11, 11, 12, 12, 13, 13, 14, 2, 3, 3, 4, 4, 5, 5, 6, 10, 11, 11, 12, 12, 13, 13, 14);
-    __m256i T0, T1, T2, T3, S0, S1, S2, S3, sum;
+    __m256i mSwitch1 = _mm256_setr_epi8(0, 1, 2, 3, 1, 2, 3, 4, 2, 3, 4, 5, 3, 4, 5, 6, 0, 1, 2, 3, 1, 2, 3, 4, 2, 3, 4, 5, 3, 4, 5, 6);
+    __m256i mSwitch2 = _mm256_setr_epi8(4, 5, 6, 7, 5, 6, 7, 8, 6, 7, 8, 9, 7, 8, 9, 10, 4, 5, 6, 7, 5, 6, 7, 8, 6, 7, 8, 9, 7, 8, 9, 10);
+    __m256i T0, T1, T2, T3, S0, S1, sum;
     __m256i r0, r1, r2, r3;
     __m128i s0, s1, s2, s3;
-    __m256i mCoefy1_hor = _mm256_set1_epi16(*(s16*)coeff);
-    __m256i mCoefy2_hor = _mm256_set1_epi16(*(s16*)(coeff + 2));
-    __m256i mCoefy3_hor = _mm256_set1_epi16(*(s16*)(coeff + 4));
-    __m256i mCoefy4_hor = _mm256_set1_epi16(*(s16*)(coeff + 6));
+    __m256i mCoefy1_hor = _mm256_set1_epi32(*(s32*)coeff);
+    __m256i mCoefy2_hor = _mm256_set1_epi32(*(s32*)(coeff + 4));
     src -= 3;
 
     while (height > 0) {
-        uavs3d_prefetch(src + i_src, _MM_HINT_NTA);
         s0 = _mm_loadu_si128((__m128i*)(src));
         s1 = _mm_loadu_si128((__m128i*)(src + i_src));
         s2 = _mm_loadu_si128((__m128i*)(src + i_src * 2));
         s3 = _mm_loadu_si128((__m128i*)(src + i_src * 3));
+        src += i_src << 2;
+        uavs3d_prefetch(src, _MM_HINT_NTA);
+        uavs3d_prefetch(src + i_src, _MM_HINT_NTA);
 
         S0 = _mm256_set_m128i(s2, s0);
         S1 = _mm256_set_m128i(s3, s1);
 
-        S2 = _mm256_srli_si256(S0, 4);
-        S3 = _mm256_srli_si256(S1, 4);
-
-        T0 = _mm256_unpacklo_epi64(S0, S1);
-        T1 = _mm256_unpacklo_epi64(S2, S3);
-
-        r0 = _mm256_shuffle_epi8(T0, mSwitch1);
-        r1 = _mm256_shuffle_epi8(T0, mSwitch2);
-        r2 = _mm256_shuffle_epi8(T1, mSwitch1);
-        r3 = _mm256_shuffle_epi8(T1, mSwitch2);
+        r0 = _mm256_shuffle_epi8(S0, mSwitch1);
+        r1 = _mm256_shuffle_epi8(S0, mSwitch2);
+        r2 = _mm256_shuffle_epi8(S1, mSwitch1);
+        r3 = _mm256_shuffle_epi8(S1, mSwitch2);
 
         T0 = _mm256_maddubs_epi16(r0, mCoefy1_hor);
         T1 = _mm256_maddubs_epi16(r1, mCoefy2_hor);
-        T2 = _mm256_maddubs_epi16(r2, mCoefy3_hor);
-        T3 = _mm256_maddubs_epi16(r3, mCoefy4_hor);
+        T2 = _mm256_maddubs_epi16(r2, mCoefy1_hor);
+        T3 = _mm256_maddubs_epi16(r3, mCoefy2_hor);
 
         T0 = _mm256_add_epi16(T0, T1);
         T1 = _mm256_add_epi16(T2, T3);
-        sum = _mm256_add_epi16(T0, T1);
+        sum = _mm256_hadd_epi16(T0, T1);
 
         sum = _mm256_add_epi16(sum, mAddOffset);
         sum = _mm256_srai_epi16(sum, shift);
 
         s0 = _mm_packus_epi16(_mm256_castsi256_si128(sum), _mm256_extracti128_si256(sum, 1));
 
+        height -= 4;
         M32(dst) = _mm_extract_epi32(s0, 0);
         M32(dst + i_dst) = _mm_extract_epi32(s0, 1);
         M32(dst + i_dst * 2) = _mm_extract_epi32(s0, 2);
         M32(dst + i_dst * 3) = _mm_extract_epi32(s0, 3);
 
-        height -= 4;
-        src += i_src << 2;
         dst += i_dst << 2;
     }
 }
@@ -384,9 +382,11 @@ void uavs3d_if_hor_luma_w8_avx2(const pel *src, int i_src, pel *dst, int i_dst, 
     src -= 3;
 
     while (height) {
-        uavs3d_prefetch(src + i_src, _MM_HINT_NTA);
         s0 = _mm_loadu_si128((__m128i*)(src));
         s1 = _mm_loadu_si128((__m128i*)(src + i_src));
+        src += i_src << 1;
+        uavs3d_prefetch(src, _MM_HINT_NTA);
+        uavs3d_prefetch(src + i_src, _MM_HINT_NTA);
         S = _mm256_set_m128i(s1, s0);
 
         r0 = _mm256_shuffle_epi8(S, mSwitch1);
@@ -406,13 +406,11 @@ void uavs3d_if_hor_luma_w8_avx2(const pel *src, int i_src, pel *dst, int i_dst, 
         sum = _mm256_add_epi16(sum, mAddOffset);
         sum = _mm256_srai_epi16(sum, shift);
 
-        s0 = _mm_packus_epi16(_mm256_castsi256_si128(sum), _mm256_extracti128_si256(sum, 1));
-        s1 = _mm_srli_si128(s0, 8);
-        _mm_storel_epi64((__m128i*)(dst), s0);
-        _mm_storel_epi64((__m128i*)(dst + i_dst), s1);
-
         height -= 2;
-        src += i_src << 1;
+        s0 = _mm_packus_epi16(_mm256_castsi256_si128(sum), _mm256_extracti128_si256(sum, 1));
+        _mm_storel_epi64((__m128i*)(dst), s0);
+        _mm_storeh_pi((__m64*)(dst + i_dst), _mm_castsi128_ps(s0));
+
         dst += i_dst << 1;
     }
 }
@@ -436,11 +434,13 @@ void uavs3d_if_hor_luma_w16_avx2(const pel *src, int i_src, pel *dst, int i_dst,
     src -= 3;
 
 	while (height) {
-        uavs3d_prefetch(src + i_src, _MM_HINT_NTA);
 		S0 = _mm256_loadu_si256((__m256i*)(src));
         S1 = _mm256_loadu_si256((__m256i*)(src + i_src));
 		S2 = _mm256_permute4x64_epi64(S0, 0x94);
         S3 = _mm256_permute4x64_epi64(S1, 0x94);
+        src += i_src << 1;
+        uavs3d_prefetch(src, _MM_HINT_NTA);
+        uavs3d_prefetch(src + i_src, _MM_HINT_NTA);
 
 		r0 = _mm256_shuffle_epi8(S2, mSwitch1);
 		r1 = _mm256_shuffle_epi8(S2, mSwitch2);
@@ -474,11 +474,10 @@ void uavs3d_if_hor_luma_w16_avx2(const pel *src, int i_src, pel *dst, int i_dst,
 		sum0 = _mm256_srai_epi16(sum0, shift);
         sum1 = _mm256_srai_epi16(sum1, shift);
 
+        height -= 2;
 		_mm_storeu_si128((__m128i*)(dst), _mm_packus_epi16(_mm256_castsi256_si128(sum0), _mm256_extracti128_si256(sum0, 1)));
         _mm_storeu_si128((__m128i*)(dst + i_dst), _mm_packus_epi16(_mm256_castsi256_si128(sum1), _mm256_extracti128_si256(sum1, 1)));
 
-        height -= 2;
-		src += i_src << 1;
 		dst += i_dst << 1;
 	}
 }
@@ -502,13 +501,14 @@ void uavs3d_if_hor_luma_w32_avx2(const pel *src, int i_src, pel *dst, int i_dst,
     src -= 3;
 
     while (height--) {
-        uavs3d_prefetch(src + i_src, _MM_HINT_NTA);
-        
         S0 = _mm256_loadu_si256((__m256i*)(src));
         S1 = _mm256_loadu_si256((__m256i*)(src + 16));
         S2 = _mm256_permute4x64_epi64(S0, 0x94);
         S3 = _mm256_permute4x64_epi64(S1, 0x94);
 
+        src += i_src;
+        uavs3d_prefetch(src, _MM_HINT_NTA);
+        
         r0 = _mm256_shuffle_epi8(S2, mSwitch1);
         r1 = _mm256_shuffle_epi8(S2, mSwitch2);
         r2 = _mm256_shuffle_epi8(S2, mSwitch3);
@@ -544,7 +544,6 @@ void uavs3d_if_hor_luma_w32_avx2(const pel *src, int i_src, pel *dst, int i_dst,
         _mm_storeu_si128((__m128i*)(dst), _mm_packus_epi16(_mm256_castsi256_si128(sum0), _mm256_extracti128_si256(sum0, 1)));
         _mm_storeu_si128((__m128i*)(dst + 16), _mm_packus_epi16(_mm256_castsi256_si128(sum1), _mm256_extracti128_si256(sum1, 1)));
     
-        src += i_src;
         dst += i_dst;
     }
 }
@@ -634,14 +633,16 @@ void uavs3d_if_ver_chroma_w8_avx2(const pel *src, int i_src, pel *dst, int i_dst
     src -= i_src;
 
     while (height) {
-        uavs3d_prefetch(src + 5 * i_src, _MM_HINT_NTA);
-        uavs3d_prefetch(src + 6 * i_src, _MM_HINT_NTA);
-        height -= 2;
         s0 = _mm_loadl_epi64((__m128i*)(src));
         s1 = _mm_loadl_epi64((__m128i*)(src + i_src));
         s2 = _mm_loadl_epi64((__m128i*)(src + i_src2));
         s3 = _mm_loadl_epi64((__m128i*)(src + i_src3));
         s4 = _mm_loadl_epi64((__m128i*)(src + i_src4));
+
+        src += 2 * i_src;
+        height -= 2;
+        uavs3d_prefetch(src + i_src3, _MM_HINT_NTA);
+        uavs3d_prefetch(src + i_src4, _MM_HINT_NTA);
 
         S0 = _mm256_set_m128i(s1, s0);
         S1 = _mm256_set_m128i(s2, s1);
@@ -659,12 +660,10 @@ void uavs3d_if_ver_chroma_w8_avx2(const pel *src, int i_src, pel *dst, int i_dst
         mVal = _mm256_add_epi16(mVal, mAddOffset);
         mVal = _mm256_srai_epi16(mVal, shift);
         s0 = _mm_packus_epi16(_mm256_castsi256_si128(mVal), _mm256_extracti128_si256(mVal, 1));
-        s1 = _mm_srli_si128(s0, 8);
 
         _mm_storel_epi64((__m128i*)(dst), s0);
-        _mm_storel_epi64((__m128i*)(dst + i_dst), s1);
+        _mm_storeh_pi((__m64*)(dst + i_dst), _mm_castsi128_ps(s0));
 
-        src += 2 * i_src;
         dst += 2 * i_dst;
     }
 }
@@ -686,14 +685,16 @@ void uavs3d_if_ver_chroma_w16_avx2(const pel *src, int i_src, pel *dst, int i_ds
     src -= i_src;
 
     while (height) {
-        uavs3d_prefetch(src + 5 * i_src, _MM_HINT_NTA);
-        uavs3d_prefetch(src + 6 * i_src, _MM_HINT_NTA);
-        height -= 2;
         s0 = _mm_loadu_si128((__m128i*)(src));
         s1 = _mm_loadu_si128((__m128i*)(src + i_src));
         s2 = _mm_loadu_si128((__m128i*)(src + i_src2));
         s3 = _mm_loadu_si128((__m128i*)(src + i_src3));
         s4 = _mm_loadu_si128((__m128i*)(src + i_src4));
+
+        src += 2 * i_src;
+        uavs3d_prefetch(src + i_src3, _MM_HINT_NTA);
+        uavs3d_prefetch(src + i_src4, _MM_HINT_NTA);
+        height -= 2;
 
         S0 = _mm256_set_m128i(s1, s0);
         S1 = _mm256_set_m128i(s2, s1);
@@ -722,7 +723,6 @@ void uavs3d_if_ver_chroma_w16_avx2(const pel *src, int i_src, pel *dst, int i_ds
         _mm_storeu_si128((__m128i*)dst, _mm256_castsi256_si128(mVal0));
         _mm_storeu_si128((__m128i*)(dst + i_dst), _mm256_extracti128_si256(mVal0, 1));
 
-        src += 2 * i_src;
         dst += 2 * i_dst;
     }
 }
@@ -743,14 +743,16 @@ void uavs3d_if_ver_chroma_w32_avx2(const pel *src, int i_src, pel *dst, int i_ds
 	src -= i_src;
 
 	while (height) {
-        uavs3d_prefetch(src + 5 * i_src, _MM_HINT_NTA);
-        uavs3d_prefetch(src + 6 * i_src, _MM_HINT_NTA);
-        height -= 2;
 		S0 = _mm256_loadu_si256((__m256i*)(src));
 		S1 = _mm256_loadu_si256((__m256i*)(src + i_src));
 		S2 = _mm256_loadu_si256((__m256i*)(src + i_src2));
 		S3 = _mm256_loadu_si256((__m256i*)(src + i_src3));
 		S4 = _mm256_loadu_si256((__m256i*)(src + i_src4));
+
+        src += 2 * i_src;
+        height -= 2;
+        uavs3d_prefetch(src + i_src3, _MM_HINT_NTA);
+        uavs3d_prefetch(src + i_src4, _MM_HINT_NTA);
 
 		T0 = _mm256_unpacklo_epi8(S0, S1);
 		T1 = _mm256_unpackhi_epi8(S0, S1);
@@ -789,7 +791,6 @@ void uavs3d_if_ver_chroma_w32_avx2(const pel *src, int i_src, pel *dst, int i_ds
         _mm256_storeu_si256((__m256i*)dst, mVal0);
         _mm256_storeu_si256((__m256i*)(dst + i_dst), mVal2);
 
-		src += 2 * i_src;
 		dst += 2 * i_dst;
 
 	}
@@ -810,7 +811,6 @@ void uavs3d_if_ver_chroma_w64_avx2(const pel *src, int i_src, pel *dst, int i_ds
 	src -= i_src;
 
 	while (height--){
-        uavs3d_prefetch(src + 4 * i_src, _MM_HINT_NTA);
         S0 = _mm256_loadu_si256((__m256i*)(src));
         S4 = _mm256_loadu_si256((__m256i*)(src + 32));
         S1 = _mm256_loadu_si256((__m256i*)(src + i_src));
@@ -820,6 +820,7 @@ void uavs3d_if_ver_chroma_w64_avx2(const pel *src, int i_src, pel *dst, int i_ds
         S3 = _mm256_loadu_si256((__m256i*)(src + i_src3));
         S7 = _mm256_loadu_si256((__m256i*)(src + i_src3 + 32));
 
+		src += i_src;
 		T0 = _mm256_unpacklo_epi8(S0, S1);
 		T1 = _mm256_unpacklo_epi8(S2, S3);
 		T2 = _mm256_unpackhi_epi8(S0, S1);
@@ -828,6 +829,8 @@ void uavs3d_if_ver_chroma_w64_avx2(const pel *src, int i_src, pel *dst, int i_ds
         T5 = _mm256_unpacklo_epi8(S6, S7);
         T6 = _mm256_unpackhi_epi8(S4, S5);
         T7 = _mm256_unpackhi_epi8(S6, S7);
+
+        uavs3d_prefetch(src + i_src3, _MM_HINT_NTA);
 
 		T0 = _mm256_maddubs_epi16(T0, coeff0);
 		T1 = _mm256_maddubs_epi16(T1, coeff1);
@@ -857,7 +860,6 @@ void uavs3d_if_ver_chroma_w64_avx2(const pel *src, int i_src, pel *dst, int i_ds
         _mm256_storeu_si256((__m256i*)(dst), mVal0);
         _mm256_storeu_si256((__m256i*)(dst + 32), mVal1);
 
-		src += i_src;
 		dst += i_dst;
 	}
 }
@@ -877,7 +879,6 @@ void uavs3d_if_ver_chroma_w128_avx2(const pel *src, int i_src, pel *dst, int i_d
     src -= i_src;
 
     while (height--) {
-        uavs3d_prefetch(src + 4 * i_src, _MM_HINT_NTA);
         S0 = _mm256_loadu_si256((__m256i*)(src));
         S4 = _mm256_loadu_si256((__m256i*)(src + 32));
         S1 = _mm256_loadu_si256((__m256i*)(src + i_src));
@@ -933,6 +934,9 @@ void uavs3d_if_ver_chroma_w128_avx2(const pel *src, int i_src, pel *dst, int i_d
         S3 = _mm256_loadu_si256((__m256i*)(src + i_src3 + 64));
         S7 = _mm256_loadu_si256((__m256i*)(src + i_src3 + 96));
 
+        src += i_src;
+        uavs3d_prefetch(src + i_src3, _MM_HINT_NTA);
+
         T0 = _mm256_unpacklo_epi8(S0, S1);
         T1 = _mm256_unpacklo_epi8(S2, S3);
         T2 = _mm256_unpackhi_epi8(S0, S1);
@@ -970,7 +974,6 @@ void uavs3d_if_ver_chroma_w128_avx2(const pel *src, int i_src, pel *dst, int i_d
         _mm256_storeu_si256((__m256i*)(dst + 64), mVal0);
         _mm256_storeu_si256((__m256i*)(dst + 96), mVal1);
 
-        src += i_src;
         dst += i_dst;
     }
 }
@@ -1077,7 +1080,6 @@ void uavs3d_if_ver_luma_w8_avx2(const pel *src, int i_src, pel *dst, int i_dst, 
     while (height) {
         __m128i S0, S1, S2, S3, S4, S5, S6, S7, S8;
 
-        height -= 2;
         S0 = _mm_loadl_epi64((__m128i*)(src));
         S1 = _mm_loadl_epi64((__m128i*)(src + i_src));
         S2 = _mm_loadl_epi64((__m128i*)(src + i_src2));
@@ -1097,6 +1099,11 @@ void uavs3d_if_ver_luma_w8_avx2(const pel *src, int i_src, pel *dst, int i_dst, 
         R6 = _mm256_set_m128i(S7, S6);
         R7 = _mm256_set_m128i(S8, S7);
 
+        src += 2 * i_src;
+        height -= 2;
+        uavs3d_prefetch(src + i_src7, _MM_HINT_NTA);
+        uavs3d_prefetch(src + i_src8, _MM_HINT_NTA);
+
         T0 = _mm256_unpacklo_epi8(R0, R1);
         T1 = _mm256_unpacklo_epi8(R2, R3);
         T2 = _mm256_unpacklo_epi8(R4, R5);
@@ -1114,11 +1121,9 @@ void uavs3d_if_ver_luma_w8_avx2(const pel *src, int i_src, pel *dst, int i_dst, 
         mVal = _mm256_add_epi16(mVal, mAddOffset);
         mVal = _mm256_srai_epi16(mVal, shift);
         S0 = _mm_packus_epi16(_mm256_castsi256_si128(mVal), _mm256_extracti128_si256(mVal, 1));
-        S1 = _mm_srli_si128(S0, 8);
 
         _mm_storel_epi64((__m128i*)(dst), S0);
-        _mm_storel_epi64((__m128i*)(dst + i_dst), S1);
-        src += 2 * i_src;
+        _mm_storeh_pi((__m64*)(dst + i_dst), _mm_castsi128_ps(S0));
         dst += 2 * i_dst;
     }
 }
@@ -1146,10 +1151,6 @@ void uavs3d_if_ver_luma_w16_avx2(const pel *src, int i_src, pel *dst, int i_dst,
 
 	while(height) {
         __m128i S0, S1, S2, S3, S4, S5, S6, S7, S8;
-        uavs3d_prefetch(src + 9 * i_src, _MM_HINT_NTA);
-        uavs3d_prefetch(src + 10 * i_src, _MM_HINT_NTA);
-
-        height -= 2;
 		S0 = _mm_loadu_si128((__m128i*)(src));
 		S1 = _mm_loadu_si128((__m128i*)(src + i_src));
 		S2 = _mm_loadu_si128((__m128i*)(src + i_src2));
@@ -1168,6 +1169,12 @@ void uavs3d_if_ver_luma_w16_avx2(const pel *src, int i_src, pel *dst, int i_dst,
 		R5 = _mm256_set_m128i(S5, S6);
 		R6 = _mm256_set_m128i(S6, S7);
 		R7 = _mm256_set_m128i(S7, S8);
+
+		src += 2 * i_src;
+        height -= 2;
+
+        uavs3d_prefetch(src + i_src7, _MM_HINT_NTA);
+        uavs3d_prefetch(src + i_src8, _MM_HINT_NTA);
 
 		T0 = _mm256_unpacklo_epi8(R0, R1);
 		T1 = _mm256_unpackhi_epi8(R0, R1);
@@ -1202,7 +1209,6 @@ void uavs3d_if_ver_luma_w16_avx2(const pel *src, int i_src, pel *dst, int i_dst,
 
         _mm_storeu_si128((__m128i*)dst, _mm256_extractf128_si256(mVal1, 1));
         _mm_storeu_si128((__m128i*)(dst + i_dst), _mm256_castsi256_si128(mVal1));
-		src += 2 * i_src;
 		dst += 2 * i_dst;
 	}
 }
@@ -1229,7 +1235,6 @@ void uavs3d_if_ver_luma_w32_avx2(const pel *src, int i_src, pel *dst, int i_dst,
 	src -= 3 * i_src;
 	while (height--) {
         __m256i S0, S1, S2, S3, S4, S5, S6, S7;
-        uavs3d_prefetch(src + 8 * i_src, _MM_HINT_NTA);
 		S0 = _mm256_loadu_si256((__m256i*)(src));
 		S1 = _mm256_loadu_si256((__m256i*)(src + i_src));
 		S2 = _mm256_loadu_si256((__m256i*)(src + i_src2));
@@ -1239,6 +1244,7 @@ void uavs3d_if_ver_luma_w32_avx2(const pel *src, int i_src, pel *dst, int i_dst,
 		S6 = _mm256_loadu_si256((__m256i*)(src + i_src6));
 		S7 = _mm256_loadu_si256((__m256i*)(src + i_src7));
 
+		src += i_src;
 		T0 = _mm256_unpacklo_epi8(S0, S1);
 		T1 = _mm256_unpacklo_epi8(S2, S3);
 		T2 = _mm256_unpacklo_epi8(S4, S5);
@@ -1247,6 +1253,8 @@ void uavs3d_if_ver_luma_w32_avx2(const pel *src, int i_src, pel *dst, int i_dst,
 		T5 = _mm256_unpackhi_epi8(S2, S3);
 		T6 = _mm256_unpackhi_epi8(S4, S5);
 		T7 = _mm256_unpackhi_epi8(S6, S7);
+
+        uavs3d_prefetch(src + i_src7, _MM_HINT_NTA);
 
 		T0 = _mm256_maddubs_epi16(T0, coeff0);
 		T1 = _mm256_maddubs_epi16(T1, coeff1);
@@ -1272,7 +1280,6 @@ void uavs3d_if_ver_luma_w32_avx2(const pel *src, int i_src, pel *dst, int i_dst,
 
 		_mm256_storeu_si256((__m256i*)(dst), mVal1);
 
-		src += i_src;
 		dst += i_dst;
 	}
 }
@@ -1294,12 +1301,11 @@ void uavs3d_if_ver_luma_w64_avx2(const pel *src, int i_src, pel *dst, int i_dst,
 	__m256i coeff3 = _mm256_set1_epi16(*(s16*)(coeff + 6));
 	__m256i T0, T1, T2, T3, T4, T5, T6, T7, mVal1, mVal2;
 
-	src -= 3 * i_src;
+	src -= i_src3;
 
 	while (height--) {
 		const pel *p = src + 32;
         __m256i S0, S1, S2, S3, S4, S5, S6, S7;
-        uavs3d_prefetch(src + 8 * i_src, _MM_HINT_NTA);
 		S0 = _mm256_loadu_si256((__m256i*)(src));
 		S1 = _mm256_loadu_si256((__m256i*)(src + i_src));
 		S2 = _mm256_loadu_si256((__m256i*)(src + i_src2));
@@ -1351,6 +1357,7 @@ void uavs3d_if_ver_luma_w64_avx2(const pel *src, int i_src, pel *dst, int i_dst,
 		S6 = _mm256_loadu_si256((__m256i*)(p + i_src6));
 		S7 = _mm256_loadu_si256((__m256i*)(p + i_src7));
 
+        src += i_src;
 		T0 = _mm256_unpacklo_epi8(S0, S1);
 		T1 = _mm256_unpacklo_epi8(S2, S3);
 		T2 = _mm256_unpacklo_epi8(S4, S5);
@@ -1359,6 +1366,8 @@ void uavs3d_if_ver_luma_w64_avx2(const pel *src, int i_src, pel *dst, int i_dst,
 		T5 = _mm256_unpackhi_epi8(S2, S3);
 		T6 = _mm256_unpackhi_epi8(S4, S5);
 		T7 = _mm256_unpackhi_epi8(S6, S7);
+
+        uavs3d_prefetch(src + i_src7, _MM_HINT_NTA);
 
 		T0 = _mm256_maddubs_epi16(T0, coeff0);
 		T1 = _mm256_maddubs_epi16(T1, coeff1);
@@ -1384,7 +1393,6 @@ void uavs3d_if_ver_luma_w64_avx2(const pel *src, int i_src, pel *dst, int i_dst,
 
 		_mm256_storeu_si256((__m256i*)(dst + 32), mVal1);
 
-		src += i_src;
 		dst += i_dst;
 	}
 }
@@ -1411,7 +1419,6 @@ void uavs3d_if_ver_luma_w128_avx2(const pel *src, int i_src, pel *dst, int i_dst
     while (height--) {
         const pel *p = src + 32;
         __m256i S0, S1, S2, S3, S4, S5, S6, S7;
-        uavs3d_prefetch(src + 8 * i_src, _MM_HINT_NTA);
         S0 = _mm256_loadu_si256((__m256i*)(src));
         S1 = _mm256_loadu_si256((__m256i*)(src + i_src));
         S2 = _mm256_loadu_si256((__m256i*)(src + i_src2));
@@ -1551,6 +1558,8 @@ void uavs3d_if_ver_luma_w128_avx2(const pel *src, int i_src, pel *dst, int i_dst
         S6 = _mm256_loadu_si256((__m256i*)(p + i_src6));
         S7 = _mm256_loadu_si256((__m256i*)(p + i_src7));
 
+        src += i_src;
+        uavs3d_prefetch(src + i_src7, _MM_HINT_NTA);
         T0 = _mm256_unpacklo_epi8(S0, S1);
         T1 = _mm256_unpacklo_epi8(S2, S3);
         T2 = _mm256_unpacklo_epi8(S4, S5);
@@ -1584,7 +1593,6 @@ void uavs3d_if_ver_luma_w128_avx2(const pel *src, int i_src, pel *dst, int i_dst
 
         _mm256_storeu_si256((__m256i*)(dst + 96), mVal1);
 
-        src += i_src;
         dst += i_dst;
     }
 }
@@ -1667,6 +1675,8 @@ void uavs3d_if_hor_ver_chroma_w8_avx2(const pel *src, int i_src, pel *dst, int i
         S2 = _mm256_permute2x128_si256(mVal[1], mVal[2], 0x21);
         S3 = mVal[2];
 
+        uavs3d_prefetch(src + i_src3, _MM_HINT_NTA);
+
         T0 = _mm256_unpacklo_epi16(S0, S1);
         T1 = _mm256_unpacklo_epi16(S2, S3);
         T2 = _mm256_unpackhi_epi16(S0, S1);
@@ -1708,17 +1718,15 @@ void uavs3d_if_hor_ver_chroma_w8_avx2(const pel *src, int i_src, pel *dst, int i
         T0 = _mm256_srai_epi32(T0, shift);
         T2 = _mm256_srai_epi32(T2, shift);
 
-        s0 = _mm_packus_epi16(_mm256_castsi256_si128(R0), _mm256_extracti128_si256(R0, 1));
-        s1 = _mm_srli_si128(s0, 8);
+        s2 = _mm_packus_epi16(_mm256_castsi256_si128(R0), _mm256_extracti128_si256(R0, 1));
 
         T0 = _mm256_packs_epi32(T0, T2);
-        s2 = _mm_packus_epi16(_mm256_castsi256_si128(T0), _mm256_extracti128_si256(T0, 1));
-        s3 = _mm_srli_si128(s2, 8);
+        s3 = _mm_packus_epi16(_mm256_castsi256_si128(T0), _mm256_extracti128_si256(T0, 1));
 
-        _mm_storel_epi64((__m128i*)(dst), s0);
-        _mm_storel_epi64((__m128i*)(dst + i_dst), s1);
-        _mm_storel_epi64((__m128i*)(dst + i_dst*2), s2);
-        _mm_storel_epi64((__m128i*)(dst + i_dst*3), s3);
+        _mm_storel_epi64((__m128i*)(dst), s2);
+        _mm_storeh_pi((__m64*)(dst + i_dst), _mm_castsi128_ps(s2));
+        _mm_storel_epi64((__m128i*)(dst + i_dst*2), s3);
+        _mm_storeh_pi((__m64*)(dst + i_dst*3), _mm_castsi128_ps(s3));
 
         dst += i_dst << 2;
         height -= 4;
@@ -1755,9 +1763,10 @@ void uavs3d_if_hor_ver_chroma_w16_avx2(const pel *src, int i_src, pel *dst, int 
     row = height + 3;
 
     while (row--) {
-        uavs3d_prefetch(src + i_src*2, _MM_HINT_NTA);
         S0 = _mm256_loadu_si256((__m256i*)(src));
+        src += i_src;
         S1 = _mm256_permute4x64_epi64(S0, 0x94);
+        uavs3d_prefetch(src, _MM_HINT_NTA);
         R0 = _mm256_shuffle_epi8(S1, mSwitch1);
         R1 = _mm256_shuffle_epi8(S1, mSwitch2);
         T0 = _mm256_maddubs_epi16(R0, mCoefy1_hor);
@@ -1765,7 +1774,6 @@ void uavs3d_if_hor_ver_chroma_w16_avx2(const pel *src, int i_src, pel *dst, int 
         sum = _mm256_add_epi16(T0, T1);
 
         _mm256_storeu_si256((__m256i*)(tmp), sum);
-        src += i_src;
         tmp += i_tmp;
     }
 
@@ -2054,8 +2062,8 @@ void uavs3d_if_hor_ver_luma_w4_avx2(const pel *src, int i_src, pel *dst, int i_d
 
     s0 = _mm_loadu_si128((__m128i*)(src));
     s1 = _mm_loadu_si128((__m128i*)(src + i_src));
-    s2 = _mm_loadu_si128((__m128i*)(src + i_src * 2));
-    s3 = _mm_loadu_si128((__m128i*)(src + i_src * 3));
+    s2 = _mm_loadu_si128((__m128i*)(src + i_src2));
+    s3 = _mm_loadu_si128((__m128i*)(src + i_src3));
 
     S0 = _mm256_set_m128i(s2, s0);
     S1 = _mm256_set_m128i(s3, s1);
@@ -2089,8 +2097,8 @@ void uavs3d_if_hor_ver_luma_w4_avx2(const pel *src, int i_src, pel *dst, int i_d
         // hor
         s0 = _mm_loadu_si128((__m128i*)(src));
         s1 = _mm_loadu_si128((__m128i*)(src + i_src));
-        s2 = _mm_loadu_si128((__m128i*)(src + i_src * 2));
-        s3 = _mm_loadu_si128((__m128i*)(src + i_src * 3));
+        s2 = _mm_loadu_si128((__m128i*)(src + i_src2));
+        s3 = _mm_loadu_si128((__m128i*)(src + i_src3));
 
         S0 = _mm256_set_m128i(s2, s0);
         S1 = _mm256_set_m128i(s3, s1);
@@ -2195,6 +2203,9 @@ void uavs3d_if_hor_ver_luma_w8_avx2(const pel *src, int i_src, pel *dst, int i_d
         {
             __m128i mSrc0 = _mm_loadu_si128((__m128i*)(src));
             T0 = _mm256_set_m128i(mSrc0, mSrc0);
+            src += i_src;
+
+            uavs3d_prefetch(src, _MM_HINT_NTA);
 
             r0 = _mm256_shuffle_epi8(T0, mSwitch1);
             r1 = _mm256_shuffle_epi8(T0, mSwitch2);
@@ -2212,13 +2223,16 @@ void uavs3d_if_hor_ver_luma_w8_avx2(const pel *src, int i_src, pel *dst, int i_d
 
             mVal[0] = _mm256_permute4x64_epi64(mVal[0], 0x44);
 
-            src += i_src;
         }
 
         for (row = 1; row < 4; row++) {
             __m128i mSrc0 = _mm_loadu_si128((__m128i*)(src));
             __m128i mSrc1 = _mm_loadu_si128((__m128i*)(src + i_src));
             T0 = _mm256_set_m128i(mSrc1, mSrc0);
+            src += i_src2;
+
+            uavs3d_prefetch(src, _MM_HINT_NTA);
+            uavs3d_prefetch(src + i_src, _MM_HINT_NTA);
 
             r0 = _mm256_shuffle_epi8(T0, mSwitch1);
             r1 = _mm256_shuffle_epi8(T0, mSwitch2);
@@ -2233,8 +2247,6 @@ void uavs3d_if_hor_ver_luma_w8_avx2(const pel *src, int i_src, pel *dst, int i_d
             T0 = _mm256_add_epi16(T0, T1);
             T1 = _mm256_add_epi16(T2, T3);
             mVal[row] = _mm256_add_epi16(T0, T1);
-
-            src += i_src2;
         }
     }
     
@@ -2257,12 +2269,15 @@ void uavs3d_if_hor_ver_luma_w8_avx2(const pel *src, int i_src, pel *dst, int i_d
             s1 = _mm_loadu_si128((__m128i*)(src + i_src));
             T0 = _mm256_set_m128i(s1, s0);
 
+            src += i_src2;
+
+            uavs3d_prefetch(src, _MM_HINT_NTA);
+            uavs3d_prefetch(src + i_src, _MM_HINT_NTA);
+
             r0 = _mm256_shuffle_epi8(T0, mSwitch1);
             r1 = _mm256_shuffle_epi8(T0, mSwitch2);
             r2 = _mm256_shuffle_epi8(T0, mSwitch3);
             r3 = _mm256_shuffle_epi8(T0, mSwitch4);
-
-            src += i_src2;
 
             T0 = _mm256_maddubs_epi16(r0, mCoefy1_hor);
             T1 = _mm256_maddubs_epi16(r1, mCoefy2_hor);
@@ -2276,7 +2291,12 @@ void uavs3d_if_hor_ver_luma_w8_avx2(const pel *src, int i_src, pel *dst, int i_d
             T1 = _mm256_add_epi16(T2, T3);
             mVal[4] = _mm256_add_epi16(T0, T1);
 
+            src += i_src2;
+
             T0 = _mm256_set_m128i(s1, s0);
+
+            uavs3d_prefetch(src, _MM_HINT_NTA);
+            uavs3d_prefetch(src + i_src, _MM_HINT_NTA);
 
             r0 = _mm256_shuffle_epi8(T0, mSwitch1);
             r1 = _mm256_shuffle_epi8(T0, mSwitch2);
@@ -2291,8 +2311,6 @@ void uavs3d_if_hor_ver_luma_w8_avx2(const pel *src, int i_src, pel *dst, int i_d
             T0 = _mm256_add_epi16(T0, T1);
             T1 = _mm256_add_epi16(T2, T3);
             mVal[5] = _mm256_add_epi16(T0, T1);
-
-            src += i_src2;
 
             T0 = _mm256_permute2x128_si256(mVal[0], mVal[1], 0x21); 
             T1 = mVal[1];
@@ -2341,10 +2359,9 @@ void uavs3d_if_hor_ver_luma_w8_avx2(const pel *src, int i_src, pel *dst, int i_d
 
             T0 = _mm256_packs_epi32(T0, T4);
             s0 = _mm_packus_epi16(_mm256_castsi256_si128(T0), _mm256_extracti128_si256(T0, 1));
-            s1 = _mm_srli_si128(s0, 8);
 
             _mm_storel_epi64((__m128i*)(dst), s0);
-            _mm_storel_epi64((__m128i*)(dst + i_dst), s1);
+            _mm_storeh_pi((__m64*)(dst + i_dst), _mm_castsi128_ps(s0));
 
             r4 = _mm256_unpacklo_epi16(T8, T9);
             r9 = _mm256_unpackhi_epi16(T8, T9);
@@ -2371,13 +2388,12 @@ void uavs3d_if_hor_ver_luma_w8_avx2(const pel *src, int i_src, pel *dst, int i_d
 
             T0 = _mm256_packs_epi32(T0, T4);
             s0 = _mm_packus_epi16(_mm256_castsi256_si128(T0), _mm256_extracti128_si256(T0, 1));
-            s1 = _mm_srli_si128(s0, 8);
 
+            height -= 4;
             _mm_storel_epi64((__m128i*)(dst + i_dst * 2), s0);
-            _mm_storel_epi64((__m128i*)(dst + i_dst * 3), s1);
+            _mm_storeh_pi((__m64*)(dst + i_dst * 3), _mm_castsi128_ps(s0));
 
             dst += i_dst << 2;
-            height -= 4;
         }
     }
 }
@@ -2410,8 +2426,9 @@ void uavs3d_if_hor_ver_luma_w16_avx2(const pel *src, int i_src, pel *dst, int i_
         row = height + 7;
         while (row--) {
             S = _mm256_loadu_si256((__m256i*)(src));
-            uavs3d_prefetch(src + i_src, _MM_HINT_NTA);
+            src += i_src;
             S0 = _mm256_permute4x64_epi64(S, 0x94);
+            uavs3d_prefetch(src, _MM_HINT_NTA);
 
             r0 = _mm256_shuffle_epi8(S0, mSwitch1);
             r1 = _mm256_shuffle_epi8(S0, mSwitch2);
@@ -2429,7 +2446,6 @@ void uavs3d_if_hor_ver_luma_w16_avx2(const pel *src, int i_src, pel *dst, int i_
 
             _mm256_storeu_si256((__m256i*)(tmp), sum);
 
-            src += i_src;
             tmp += 16;
         }
     }
@@ -2592,9 +2608,9 @@ void uavs3d_if_hor_ver_luma_w16_avx2(const pel *src, int i_src, pel *dst, int i_
             mVal = _mm256_packs_epi32(mVal1, mVal2);
             _mm_storeu_si128((__m128i*)(dst + 3 * i_dst), _mm_packus_epi16(_mm256_castsi256_si128(mVal), _mm256_extracti128_si256(mVal, 1)));
 
+            height -= 4;
             tmp += 4 * i_tmp;
             dst += 4 * i_dst;
-            height -= 4;
         }
     }
 }
@@ -2624,11 +2640,12 @@ void uavs3d_if_hor_ver_luma_w32_avx2(const pel *src, int i_src, pel *dst, int i_
 
         row = height + 7;
         while (row--) {
-            uavs3d_prefetch(src + i_src, _MM_HINT_NTA);
             S0 = _mm256_loadu_si256((__m256i*)(src));
             S1 = _mm256_loadu_si256((__m256i*)(src + 8));
-            S2 = _mm256_insertf128_si256(S0, _mm256_castsi256_si128(S1), 0x1);
-            S3 = _mm256_insertf128_si256(S1, _mm256_extracti128_si256(S0, 1), 0x0);
+            src += i_src;
+            S2 = _mm256_permute2x128_si256(S0, S1, 0x20);
+            S3 = _mm256_permute2x128_si256(S0, S1, 0x31);
+            uavs3d_prefetch(src, _MM_HINT_NTA);
 
             T0 = _mm256_shuffle_epi8(S2, mSwitch1);
             T1 = _mm256_shuffle_epi8(S2, mSwitch2);
@@ -2658,7 +2675,6 @@ void uavs3d_if_hor_ver_luma_w32_avx2(const pel *src, int i_src, pel *dst, int i_
             _mm256_storeu_si256((__m256i*)(tmp), T0);
             _mm256_storeu_si256((__m256i*)(tmp + 16), T4);
 
-            src += i_src;
             tmp += i_tmp;
         }
     }
@@ -2867,8 +2883,8 @@ void uavs3d_if_hor_ver_luma_w32x_avx2(const pel *src, int i_src, pel *dst, int i
             {
                 S0 = _mm256_loadu_si256((__m256i*)(src + col));
                 S1 = _mm256_loadu_si256((__m256i*)(src + col + 8));
-                S2 = _mm256_insertf128_si256(S0, _mm256_castsi256_si128(S1), 0x1);
-                S3 = _mm256_insertf128_si256(S1, _mm256_extracti128_si256(S0, 1), 0x0);
+                S2 = _mm256_permute2x128_si256(S0, S1, 0x20);
+                S3 = _mm256_permute2x128_si256(S0, S1, 0x31);
 
                 T0 = _mm256_shuffle_epi8(S2, mSwitch1);
                 T1 = _mm256_shuffle_epi8(S2, mSwitch2);
