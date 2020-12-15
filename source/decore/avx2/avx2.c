@@ -209,6 +209,7 @@ void uavs3d_funs_init_avx2()
     uavs3d_funs_handle.ipflt_ext[IPFILTER_EXT_4][4] = uavs3d_if_hor_ver_chroma_w16x_avx2;
     uavs3d_funs_handle.ipflt_ext[IPFILTER_EXT_4][5] = uavs3d_if_hor_ver_chroma_w16x_avx2;
 
+    uavs3d_funs_handle.ipflt_ext[IPFILTER_EXT_8][1] = uavs3d_if_hor_ver_luma_w8_avx2;
     uavs3d_funs_handle.ipflt_ext[IPFILTER_EXT_8][2] = uavs3d_if_hor_ver_luma_w16x_avx2;
     uavs3d_funs_handle.ipflt_ext[IPFILTER_EXT_8][3] = uavs3d_if_hor_ver_luma_w16x_avx2;
     uavs3d_funs_handle.ipflt_ext[IPFILTER_EXT_8][4] = uavs3d_if_hor_ver_luma_w16x_avx2;

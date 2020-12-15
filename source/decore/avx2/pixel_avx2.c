@@ -986,8 +986,8 @@ void uavs3d_recon_chroma_w16_avx2(s16 *resi_u, s16 *resi_v, pel *pred, int width
             r1 = _mm256_loadu_si256((const __m256i*)(resi_v));
             r2 = _mm256_unpacklo_epi16(r0, r1);    // UV interlaced: uv0-uv4 uv8-uv12
             r3 = _mm256_unpackhi_epi16(r0, r1);
-            r0 = _mm256_insertf128_si256(r2, _mm256_castsi256_si128(r3), 0x1);  // uv0-uv8
-            r1 = _mm256_insertf128_si256(r3, _mm256_extracti128_si256(r2, 1), 0x0);
+            r0 = _mm256_permute2x128_si256(r2, r3, 0x20);  // uv0-uv8
+            r1 = _mm256_permute2x128_si256(r2, r3, 0x31);
             p0 = _mm256_adds_epi16(p0, r0);
             p1 = _mm256_adds_epi16(p1, r1);
 
@@ -1035,8 +1035,8 @@ void uavs3d_recon_chroma_w16_avx2(s16 *resi_u, s16 *resi_v, pel *pred, int width
             r1 = _mm256_loadu_si256((const __m256i*)(resi_v));
             r2 = _mm256_unpacklo_epi16(zero, r1);    // UV interlaced: uv0-uv4 uv8-uv12
             r3 = _mm256_unpackhi_epi16(zero, r1);
-            r0 = _mm256_insertf128_si256(r2, _mm256_castsi256_si128(r3), 0x1);  // uv0-uv8
-            r1 = _mm256_insertf128_si256(r3, _mm256_extracti128_si256(r2, 1), 0x0);
+            r0 = _mm256_permute2x128_si256(r2, r3, 0x20);  // uv0-uv8
+            r1 = _mm256_permute2x128_si256(r2, r3, 0x31);
             p0 = _mm256_adds_epi16(p0, r0);
             p1 = _mm256_adds_epi16(p1, r1);
 
@@ -1073,8 +1073,8 @@ void uavs3d_recon_chroma_w16x_avx2(s16 *resi_u, s16 *resi_v, pel *pred, int widt
                 r1 = _mm256_loadu_si256((const __m256i*)(resi_v + j));
                 r2 = _mm256_unpacklo_epi16(r0, r1);    // UV interlaced: uv0-uv4 uv8-uv12
                 r3 = _mm256_unpackhi_epi16(r0, r1);
-                r0 = _mm256_insertf128_si256(r2, _mm256_castsi256_si128(r3), 0x1);  // uv0-uv8
-                r1 = _mm256_insertf128_si256(r3, _mm256_extracti128_si256(r2, 1), 0x0);
+                r0 = _mm256_permute2x128_si256(r2, r3, 0x20);  // uv0-uv8
+                r1 = _mm256_permute2x128_si256(r2, r3, 0x31);
                 p0 = _mm256_adds_epi16(p0, r0);
                 p1 = _mm256_adds_epi16(p1, r1);
 
@@ -1126,8 +1126,8 @@ void uavs3d_recon_chroma_w16x_avx2(s16 *resi_u, s16 *resi_v, pel *pred, int widt
                 r1 = _mm256_loadu_si256((const __m256i*)(resi_v + j));
                 r2 = _mm256_unpacklo_epi16(zero, r1);    // UV interlaced: uv0-uv4 uv8-uv12
                 r3 = _mm256_unpackhi_epi16(zero, r1);
-                r0 = _mm256_insertf128_si256(r2, _mm256_castsi256_si128(r3), 0x1);  // uv0-uv8
-                r1 = _mm256_insertf128_si256(r3, _mm256_extracti128_si256(r2, 1), 0x0);
+                r0 = _mm256_permute2x128_si256(r2, r3, 0x20);  // uv0-uv8
+                r1 = _mm256_permute2x128_si256(r2, r3, 0x31);
                 p0 = _mm256_adds_epi16(p0, r0);
                 p1 = _mm256_adds_epi16(p1, r1);
 

@@ -79,14 +79,14 @@
 #define TRANSPOSE_16x8_32BIT_16BIT(I00, I01, I02, I03, I04, I05, I06, I07, I08, I09, I10, I11, I12, I13, I14, I15, O0, O1, O2, O3, O4, O5, O6, O7)\
         TRANSPOSE_8x8_32BIT_16BIT(I00, I01, I02, I03, I04, I05, I06, I07, I04, I05, I06, I07); \
         TRANSPOSE_8x8_32BIT_16BIT(I08, I09, I10, I11, I12, I13, I14, I15, I12, I13, I14, I15); \
-        O0 = _mm256_insertf128_si256(I04, _mm256_castsi256_si128(I12), 1);      \
-        O1 = _mm256_insertf128_si256(I05, _mm256_castsi256_si128(I13), 1);      \
-        O2 = _mm256_insertf128_si256(I06, _mm256_castsi256_si128(I14), 1);      \
-        O3 = _mm256_insertf128_si256(I07, _mm256_castsi256_si128(I15), 1);      \
-        O4 = _mm256_insertf128_si256(I12, _mm256_extracti128_si256(I04, 1), 0); \
-        O5 = _mm256_insertf128_si256(I13, _mm256_extracti128_si256(I05, 1), 0); \
-        O6 = _mm256_insertf128_si256(I14, _mm256_extracti128_si256(I06, 1), 0); \
-        O7 = _mm256_insertf128_si256(I15, _mm256_extracti128_si256(I07, 1), 0)
+        O0 = _mm256_permute2x128_si256(I04, I12, 0x20);      \
+        O1 = _mm256_permute2x128_si256(I05, I13, 0x20);      \
+        O2 = _mm256_permute2x128_si256(I06, I14, 0x20);      \
+        O3 = _mm256_permute2x128_si256(I07, I15, 0x20);      \
+        O4 = _mm256_permute2x128_si256(I04, I12, 0x31); \
+        O5 = _mm256_permute2x128_si256(I05, I13, 0x31); \
+        O6 = _mm256_permute2x128_si256(I06, I14, 0x31); \
+        O7 = _mm256_permute2x128_si256(I07, I15, 0x31)
 
 
 static void uavs3d_always_inline dct2_butterfly_h4_avx2(s16* src, s16* dst, int line, int shift, int bit_depth)
@@ -272,10 +272,10 @@ static void uavs3d_always_inline dct2_butterfly_h8_avx2(s16* src, int i_src, s16
 
             // transpose 8x8 : 8 x 8(32bit) --> 4 x 16(16bit)
             TRANSPOSE_8x8_32BIT_16BIT(d0, d1, d2, d3, d4, d5, d6, d7, d4, d5, d6, d7);
-            d0 = _mm256_insertf128_si256(d4, _mm256_castsi256_si128(d5), 1);      
-            d1 = _mm256_insertf128_si256(d6, _mm256_castsi256_si128(d7), 1);      
-            d2 = _mm256_insertf128_si256(d5, _mm256_extracti128_si256(d4, 1), 0); 
-            d3 = _mm256_insertf128_si256(d7, _mm256_extracti128_si256(d6, 1), 0);
+            d0 = _mm256_permute2x128_si256(d4, d5, 0x20);
+            d2 = _mm256_permute2x128_si256(d4, d5, 0x31);
+            d1 = _mm256_permute2x128_si256(d6, d7, 0x20);
+            d3 = _mm256_permute2x128_si256(d6, d7, 0x31);
 
             if (bit_depth != MAX_TX_DYNAMIC_RANGE) {
                 __m256i max_val = _mm256_set1_epi16((1 << bit_depth) - 1);
