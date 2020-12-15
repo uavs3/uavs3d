@@ -405,7 +405,7 @@ void uavs3d_if_hor_luma_w8_sse(const pel *src, int i_src, pel *dst, int i_dst, i
         height -= 2;
 
         _mm_storel_epi64((__m128i*)dst, T0);
-        M64(dst + i_dst) = _mm_extract_epi64(T0, 1);
+        _mm_storeh_pi((__m64*)(dst + i_dst), _mm_castsi128_ps(T0));
 
         src += i_src << 1;
         dst += i_dst << 1;
