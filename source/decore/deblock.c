@@ -65,7 +65,7 @@ static int uavs3d_always_inline skip_filter(com_map_t *map, com_ref_pic_t refp[M
 {
     com_scu_t MbQ = map->map_scu[scup + offset];
     com_pic_t *q_pic0, *q_pic1;
-    const com_scu_t mask = {0, 0, 0, 0, 1, 0, 0};
+    const com_scu_t mask = {0, 1, 0, 0, 1, 0, 0};
 
     if ((*(u8*)&MbQ) & (*(u8*)&mask)) {
         return 0;
@@ -210,7 +210,7 @@ void com_deblock_set_edge(com_core_t *core)
     int scu_x = core->cu_pix_x  >> MIN_CU_LOG2;
     int scu_y = core->cu_pix_y  >> MIN_CU_LOG2;
     const int grad_mask = (LOOPFILTER_GRID >> 2) - 1;
-    const com_scu_t mask = { 0, 0, 0, 0, 1, 0, 0 };
+    const com_scu_t mask = { 0, 1, 0, 0, 1, 0, 0 };
     com_scu_t scu = map->map_scu[scup];
 
     if ((*(u8*)&scu) & (*(u8*)&mask)) {
