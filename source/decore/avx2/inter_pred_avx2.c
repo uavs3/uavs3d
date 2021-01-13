@@ -4357,13 +4357,13 @@ void uavs3d_if_hor_ver_luma_w8_avx2(const pel *src, int i_src, pel *dst, int i_d
 
         while (height > 0) {
             T0 = _mm256_load_si256((__m256i*)(tmp));
-            T1 = _mm256_load_si256((__m256i*)(tmp + i_tmp));
+            T1 = _mm256_loadu_si256((__m256i*)(tmp + i_tmp));
             T2 = _mm256_load_si256((__m256i*)(tmp + 2 * i_tmp));
-            T3 = _mm256_load_si256((__m256i*)(tmp + 3 * i_tmp));
+            T3 = _mm256_loadu_si256((__m256i*)(tmp + 3 * i_tmp));
             T4 = _mm256_load_si256((__m256i*)(tmp + 4 * i_tmp));
-            T5 = _mm256_load_si256((__m256i*)(tmp + 5 * i_tmp));
+            T5 = _mm256_loadu_si256((__m256i*)(tmp + 5 * i_tmp));
             T6 = _mm256_load_si256((__m256i*)(tmp + 6 * i_tmp));
-            T7 = _mm256_load_si256((__m256i*)(tmp + 7 * i_tmp));
+            T7 = _mm256_loadu_si256((__m256i*)(tmp + 7 * i_tmp));
             height -= 2;
             tmp += i_tmp * 2;
 
