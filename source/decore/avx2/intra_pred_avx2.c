@@ -3454,8 +3454,8 @@ void uavs3d_ipred_ver_avx2(pel *src, pel *dst, int i_dst, int width, int height)
         for (y = 0; y < height; y += 2) {
             _mm256_store_si256((__m256i *)(dst), T0);
             _mm256_store_si256((__m256i *)(dst + 16), T1);
-            _mm256_store_si256((__m256i *)(dst + i_dst), T0);
-            _mm256_store_si256((__m256i *)(dst + i_dst + 16), T1);
+            _mm256_storeu_si256((__m256i *)(dst + i_dst), T0);
+            _mm256_storeu_si256((__m256i *)(dst + i_dst + 16), T1);
             dst += i_dst2;
         }
         break;
@@ -3541,8 +3541,8 @@ void uavs3d_ipred_hor_avx2(pel *src, pel *dst, int i_dst, int width, int height)
             T1 = _mm256_set1_epi16(src[-y - 1]);
             _mm256_store_si256((__m256i *)(dst), T0);
             _mm256_store_si256((__m256i *)(dst + 16), T0);
-            _mm256_store_si256((__m256i *)(dst + i_dst), T1);
-            _mm256_store_si256((__m256i *)(dst + i_dst + 16), T1);
+            _mm256_storeu_si256((__m256i *)(dst + i_dst), T1);
+            _mm256_storeu_si256((__m256i *)(dst + i_dst + 16), T1);
             dst += i_dst2;
         }
         break;
