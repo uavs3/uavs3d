@@ -3452,10 +3452,10 @@ void uavs3d_ipred_ver_avx2(pel *src, pel *dst, int i_dst, int width, int height)
         T0 = _mm256_loadu_si256((__m256i *)(src));
         T1 = _mm256_loadu_si256((__m256i *)(src + 16));
         for (y = 0; y < height; y += 2) {
-            _mm256_store_si256((__m256i *)(dst), T0);
-            _mm256_store_si256((__m256i *)(dst + 16), T1);
-            _mm256_store_si256((__m256i *)(dst + i_dst), T0);
-            _mm256_store_si256((__m256i *)(dst + i_dst + 16), T1);
+            _mm256_storeu_si256((__m256i *)(dst), T0);
+            _mm256_storeu_si256((__m256i *)(dst + 16), T1);
+            _mm256_storeu_si256((__m256i *)(dst + i_dst), T0);
+            _mm256_storeu_si256((__m256i *)(dst + i_dst + 16), T1);
             dst += i_dst2;
         }
         break;
@@ -3468,14 +3468,14 @@ void uavs3d_ipred_ver_avx2(pel *src, pel *dst, int i_dst, int width, int height)
         T2 = _mm256_loadu_si256((__m256i *)(src + 32));
         T3 = _mm256_loadu_si256((__m256i *)(src + 48));
         for (y = 0; y < height; y += 2) {
-            _mm256_store_si256((__m256i *)(dst), T0);
-            _mm256_store_si256((__m256i *)(dst + 16), T1);
-            _mm256_store_si256((__m256i *)(dst + 32), T2);
-            _mm256_store_si256((__m256i *)(dst + 48), T3);
-            _mm256_store_si256((__m256i *)(dst + i_dst), T0);
-            _mm256_store_si256((__m256i *)(dst + i_dst + 16), T1);
-            _mm256_store_si256((__m256i *)(dst + i_dst + 32), T2);
-            _mm256_store_si256((__m256i *)(dst + i_dst + 48), T3);
+            _mm256_storeu_si256((__m256i *)(dst), T0);
+            _mm256_storeu_si256((__m256i *)(dst + 16), T1);
+            _mm256_storeu_si256((__m256i *)(dst + 32), T2);
+            _mm256_storeu_si256((__m256i *)(dst + 48), T3);
+            _mm256_storeu_si256((__m256i *)(dst + i_dst), T0);
+            _mm256_storeu_si256((__m256i *)(dst + i_dst + 16), T1);
+            _mm256_storeu_si256((__m256i *)(dst + i_dst + 32), T2);
+            _mm256_storeu_si256((__m256i *)(dst + i_dst + 48), T3);
             dst += i_dst2;
         }
         break;
@@ -3539,10 +3539,10 @@ void uavs3d_ipred_hor_avx2(pel *src, pel *dst, int i_dst, int width, int height)
         for (y = 0; y < height; y += 2) {
             T0 = _mm256_set1_epi16(src[-y]);
             T1 = _mm256_set1_epi16(src[-y - 1]);
-            _mm256_store_si256((__m256i *)(dst), T0);
-            _mm256_store_si256((__m256i *)(dst + 16), T0);
-            _mm256_store_si256((__m256i *)(dst + i_dst), T1);
-            _mm256_store_si256((__m256i *)(dst + i_dst + 16), T1);
+            _mm256_storeu_si256((__m256i *)(dst), T0);
+            _mm256_storeu_si256((__m256i *)(dst + 16), T0);
+            _mm256_storeu_si256((__m256i *)(dst + i_dst), T1);
+            _mm256_storeu_si256((__m256i *)(dst + i_dst + 16), T1);
             dst += i_dst2;
         }
         break;
@@ -3553,14 +3553,14 @@ void uavs3d_ipred_hor_avx2(pel *src, pel *dst, int i_dst, int width, int height)
         for (y = 0; y < height; y += 2) {
             T0 = _mm256_set1_epi16(src[-y]);
             T1 = _mm256_set1_epi16(src[-y - 1]);
-            _mm256_store_si256((__m256i *)(dst), T0);
-            _mm256_store_si256((__m256i *)(dst + 16), T0);
-            _mm256_store_si256((__m256i *)(dst + 32), T0);
-            _mm256_store_si256((__m256i *)(dst + 48), T0);
-            _mm256_store_si256((__m256i *)(dst + i_dst), T1);
-            _mm256_store_si256((__m256i *)(dst + i_dst + 16), T1);
-            _mm256_store_si256((__m256i *)(dst + i_dst + 32), T1);
-            _mm256_store_si256((__m256i *)(dst + i_dst + 48), T1);
+            _mm256_storeu_si256((__m256i *)(dst), T0);
+            _mm256_storeu_si256((__m256i *)(dst + 16), T0);
+            _mm256_storeu_si256((__m256i *)(dst + 32), T0);
+            _mm256_storeu_si256((__m256i *)(dst + 48), T0);
+            _mm256_storeu_si256((__m256i *)(dst + i_dst), T1);
+            _mm256_storeu_si256((__m256i *)(dst + i_dst + 16), T1);
+            _mm256_storeu_si256((__m256i *)(dst + i_dst + 32), T1);
+            _mm256_storeu_si256((__m256i *)(dst + i_dst + 48), T1);
             dst += i_dst2;
         }
         break;
