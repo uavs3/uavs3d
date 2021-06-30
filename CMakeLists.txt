@@ -11,6 +11,8 @@ add_subdirectory(./source)
 
 add_executable(uavs3dec ${DIR_SRC_TEST})
 
-target_link_libraries(uavs3dec m)
+if (NOT MSVC)
+    target_link_libraries(uavs3dec m)
+endif()
 target_link_libraries(uavs3dec uavs3d)
 #target_link_libraries(uavs3dec dl)
