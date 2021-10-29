@@ -15,8 +15,8 @@ else
     shell_dir=$1
 fi
 
-VER_R=`git rev-list origin/master | sort | wc -l | gawk '{print $1}'`
-VER_L=`git rev-list HEAD | sort | wc -l | gawk '{print $1}'`
+VER_R=`git rev-list origin/master | sort | wc -l | awk '{print $1}'`
+VER_L=`git rev-list HEAD | sort | wc -l | awk '{print $1}'`
 VER_SHA1=`git log -n 1 | head -n 1 | cut -d ' ' -f 2`
 
 major_version="1"
