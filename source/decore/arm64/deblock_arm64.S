@@ -1540,12 +1540,12 @@ deblock_ver_filtered:
     bif   v17.16b, v1.16b, v25.16b
     bif   v18.16b, v6.16b, v25.16b
 
-    mov v1.2d, v17.2d
-    mov v2.2d, v28.2d
-    mov v3.2d, v30.2d
-    mov v4.2d, v31.2d
-    mov v5.2d, v29.2d
-    mov v6.2d, v18.2d
+    mov v1.16b, v17.16b
+    mov v2.16b, v28.16b
+    mov v3.16b, v30.16b
+    mov v4.16b, v31.16b
+    mov v5.16b, v29.16b
+    mov v6.16b, v18.16b
 
     st4 {v0.H, v1.H, v2.H, v3.H}[0], [x2], #8
     st4 {v4.H, v5.H, v6.H, v7.H}[0], [x2], x5
