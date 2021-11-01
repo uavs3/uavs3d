@@ -285,8 +285,8 @@ padding_rows_lr_y:
 
     ld1r {v0.8h}, [x0]
     ld1r {v2.8h}, [x5]              // right reference pointer
-    mov v1.16b, v0.16b
-    mov v3.16b, v2.16b
+    mov v1.8h, v0.8h
+    mov v3.8h, v2.8h
 
     sub x5, x0, x4
     add x6, x0, x2
@@ -332,8 +332,8 @@ padding_rows_chroma_lr_y:
     ld1r {v0.4s}, [x0]              // src[0] src[1]
     ld1r {v2.4s}, [x5]              // right reference pointer
 
-    mov v1.16b, v0.16b
-    mov v3.16b, v2.16b
+    mov v1.4s, v0.4s
+    mov v3.4s, v2.4s
 
     sub x5, x0, x4
     add x6, x0, x2
