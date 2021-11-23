@@ -758,9 +758,9 @@ dct2_h16_1st_loopx:
 dct2_h16_2nd_transform:
 
     sub sp, sp, #48
-    sub x7, sp, #16
-    st1 {v10.8h, v11.8h}, [sp]
-    st1 {v12.8h}, [x7]
+    add x7, sp, #16
+    st1 {v10.8h, v11.8h}, [x7]
+    st1 {v12.8h}, [sp]
 
     mov w8, #1
     lsl w8, w8, w5
@@ -1059,8 +1059,8 @@ dct2_h16_2nd_loopx:
     cmp x8, x3
     blt dct2_h16_2nd_loopx
 
-    ld1 {v10.8h, v11.8h}, [sp], #32
     ld1 {v12.8h}, [sp], #16
+    ld1 {v10.8h, v11.8h}, [sp], #32
     ld1 {v8.8h, v9.8h}, [sp], #32
 
 dct2_h16_end:
