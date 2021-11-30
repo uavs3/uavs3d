@@ -5268,7 +5268,7 @@ function uavs3d_if_hor_ver_luma_w8_arm64
     ldr w8, [sp]                            // w8 = max_val
 
     sub sp, sp, #80
-    sub x9, sp, #16
+    add x9, sp, #64
     st1 {v12.2d, v13.2d, v14.2d, v15.2d}, [sp]
     st1 {v11.2d}, [x9]
 
