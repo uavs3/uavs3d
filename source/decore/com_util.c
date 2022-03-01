@@ -1,5 +1,5 @@
 /**************************************************************************************
- * Copyright (c) 2018-2020 ["Peking University Shenzhen Graduate School",
+ * Copyright (c) 2018-2022 ["Peking University Shenzhen Graduate School",
  *   "Peng Cheng Laboratory", and "Guangdong Bohua UHD Innovation Corporation"]
  *
  * All rights reserved.
@@ -11,12 +11,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes the software uAVS3d developed by
- *    Peking University Shenzhen Graduate School, Peng Cheng Laboratory
- *    and Guangdong Bohua UHD Innovation Corporation.
- * 4. Neither the name of the organizations (Peking University Shenzhen Graduate School,
+ * 3. Neither the name of the organizations (Peking University Shenzhen Graduate School,
  *    Peng Cheng Laboratory and Guangdong Bohua UHD Innovation Corporation) nor the
  *    names of its contributors may be used to endorse or promote products
  *    derived from this software without specific prior written permission.
