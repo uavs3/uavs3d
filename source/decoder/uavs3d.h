@@ -132,6 +132,9 @@ typedef struct uavs3d_com_seqh_t {
     unsigned int   bbv_buffer_size;            /* 18 bits */
     int            horizontal_size;            /* 14 bits */
     int            vertical_size;              /* 14 bits */
+	int            display_horizontal_size;    /* 14 bits */
+    int            display_vertical_size;      /* 14 bits */
+	
     unsigned char  log2_max_cu_width_height;   /*  3 bits */
     unsigned char  min_cu_size;
     unsigned char  max_part_ratio_log2;

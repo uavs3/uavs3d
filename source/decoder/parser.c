@@ -83,6 +83,9 @@ int dec_parse_sqh(com_bs_t * bs, com_seqh_t * seqhdr)
     dec_bs_read1(bs, 1); //marker_bit
     seqhdr->vertical_size = dec_bs_read(bs, 14, 0, COM_UINT32_MAX);
                                                                 
+    seqhdr->display_horizontal_size = seqhdr->horizontal_size;
+    seqhdr->display_vertical_size   = seqhdr->vertical_size;
+																
     seqhdr->chroma_format    = (u8)dec_bs_read(bs, 2, 1, 1);      
     seqhdr->sample_precision = (u8)dec_bs_read(bs, 3, 1, 2);     
                                                                 
@@ -269,9 +272,9 @@ static int sequence_display_extension(com_bs_t * bs, com_seqh_t *seqhdr)
         seqhdr->transfer_characteristics = dec_bs_read(bs, 8, 0, COM_UINT32_MAX);   // transfer_characteristics u(8)
         seqhdr->matrix_coefficients      = dec_bs_read(bs, 8, 0, COM_UINT32_MAX);   // matrix_coefficients      u(8)
     }                                                  
-    dec_bs_read(bs, 14, 0, COM_UINT32_MAX);            // display_horizontal_size  u(14)
+    seqhdr->display_horizontal_size = dec_bs_read(bs, 14, 0, COM_UINT32_MAX);            // display_horizontal_size  u(14)
     dec_bs_read1(bs, 1); //marker_bit                  
-    dec_bs_read(bs, 14, 0, COM_UINT32_MAX);            // display_vertical_size    u(14)
+    seqhdr->display_vertical_size = dec_bs_read(bs, 14, 0, COM_UINT32_MAX);            // display_vertical_size    u(14)
     char td_mode_flag = dec_bs_read1(bs, -1);          // td_mode_flag             u(1)
                                                        
     if (td_mode_flag == 1) {                           

@@ -197,8 +197,8 @@ static int app_img_write(char * fname, uavs3d_io_frm_t * img, com_seqh_t *seqhdr
         return -1;
     }
     for (i = 0; i < 3; i++) {
-        int hor_size = seqhdr->horizontal_size >> (i ? 1 : 0);
-        int ver_size = seqhdr->vertical_size >> (i ? 1 : 0);
+        int hor_size = seqhdr->display_horizontal_size >> (i ? 1 : 0);
+        int ver_size = seqhdr->display_vertical_size   >> (i ? 1 : 0);
         unsigned char * p8 = (unsigned char *)img->buffer[i];
 
         for (j = 0; j < ver_size; j++) {

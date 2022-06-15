@@ -306,7 +306,7 @@ void uavs3d_funs_init_arm64()
     uavs3d_funs_handle.itrans_dst7[1] = uavs3d_itrans_dct8_pb8_arm64;
     uavs3d_funs_handle.itrans_dst7[2] = uavs3d_itrans_dct8_pb16_arm64;
 
-    uavs3d_funs_handle.conv_fmt_16bit = uavs3d_conv_fmt_16bit_arm64;
+    //uavs3d_funs_handle.conv_fmt_16bit = uavs3d_conv_fmt_16bit_arm64;
     uavs3d_funs_handle.padding_rows_luma = uavs3d_padding_rows_luma_arm64;
     uavs3d_funs_handle.padding_rows_chroma = uavs3d_padding_rows_chroma_arm64;
     
