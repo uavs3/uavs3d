@@ -583,8 +583,8 @@ finished:
     if (frame_num) {
         width  = dec_frame.width[0];
         height = dec_frame.height[0];
-        hor_size = dec_frame.seqhdr->horizontal_size;
-        ver_size = dec_frame.seqhdr->vertical_size;
+        hor_size = dec_frame.seqhdr->display_horizontal_size;
+        ver_size = dec_frame.seqhdr->display_vertical_size;
 
         log_level_1("=========================================================================================\n");
         log_level_1(" Resolution               = %d x %d (Coding: %d x %d)\n", hor_size, ver_size, width, height);
