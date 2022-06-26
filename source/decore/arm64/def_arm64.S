@@ -51,4 +51,6 @@
 .endm
 #endif
 
-#define COMPILE_10BIT 0
+#if defined(__APPLE__) || defined(__ANDROID__)
+#define COMPILE_10BIT=0
+#endif

@@ -76,6 +76,14 @@ elseif("${UAVS3D_TARGET_CPU}" MATCHES "arm64")
   enable_language(ASM)
 endif()
 
+if(${COMPILE_10BIT})
+    add_definitions(-DCOMPILE_10BIT=1)
+    message("-- compile 10bit")
+else()
+    add_definitions(-DCOMPILE_10BIT=0)
+    message("-- compile 8bit")
+endif()
+
 # get version
 set (CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 execute_process(COMMAND sh ${CONFIG_DIR}/version.sh ${CONFIG_DIR})

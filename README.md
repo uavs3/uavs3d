@@ -30,7 +30,7 @@ Prerequisites:
   
 Build:
   1. mkdir build/linux
-  2. cd build/linux && cmake ../..
+  2. cd build/linux && cmake -DCOMPILE_10BIT=0 ../..
   3. make && make install
 
   to build shared library, set BUILD_SHARED_LIBS=1 please.

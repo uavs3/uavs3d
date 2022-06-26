@@ -39,10 +39,25 @@
 
 #define CHECK_RAND_STRM 0
 
-#if (BIT_DEPTH == 8)
-typedef u8   pel; /* pixel type */
+#if defined(__linux__)
+#if COMPILE_10BIT
+typedef unsigned short pel; /* pixel type */
+#define BIT_DEPTH 10
 #else
-typedef s16  pel; /* pixel type */
+typedef unsigned char pel; /* pixel type */
+#define BIT_DEPTH 8
+#endif
+
+#else
+#define COMPILE_10BIT 0
+#if COMPILE_10BIT
+typedef unsigned short pel;
+#define BIT_DEPTH 10
+#else
+typedef unsigned char pel;
+#define BIT_DEPTH 8
+#endif
+
 #endif
 
 /*************************  profile & level **********************************************/
