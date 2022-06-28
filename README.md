@@ -5,8 +5,8 @@
  2) supports to compile for Android/IOS/Windows/Linux/MacOS systems.
  3) optimized for ARMv7/ARMv8/SSE4/AVX2 chips.
  4) 10bit decoding on all supported platforms.
- 5) 本编解码器已支持x86和arm平台，并在鲲鹏处理器上进行测试验证，最高可支持8K 60fps实时编解码。ARM平台推荐首选鲲鹏处理器。
-
+ 5) The uavs3 codec has supported x86 and arm platforms, and has been tested and verified on the Kunpeng processor. 
+ 6) The ARM platform recommends the Kunpeng processor.
 # license
   Copyright reserved by “Peking University Shenzhen Graduate School”, “Peng Cheng Laboratory”, and “Guangdong Bohua UHD Innovation Corporation” <br><br>
   This program is a free software. You can redistribute it and/or modify it under the terms of the BSD 3-clause license. <br>
@@ -23,6 +23,8 @@ Prerequisites:
 build:
   1. ./version.bat (to generate version.h)
   2. solution file: build/x86_windows/uavs3d.sln 
+  
+  To support 10bit streams decoding, edit source/decore/com_def.h : #define COMPILE_10BIT 1
 
 ## linux/mac
 Prerequisites:
@@ -34,6 +36,7 @@ Build:
   2. cd build/linux && cmake -DCOMPILE_10BIT=0 ../..
   3. make && make install
 
+  To support 10bit streams decoding: cmake -DCOMPILE_10BIT=1
   to build shared library, set BUILD_SHARED_LIBS=1 please.
 
 ## ios

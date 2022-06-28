@@ -35,8 +35,6 @@
 
 #include "com_sys.h"
 
-#define BIT_DEPTH 8
-
 #define CHECK_RAND_STRM 0
 
 #if defined(__linux__)
