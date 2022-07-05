@@ -52,5 +52,5 @@
 #endif
 
 #if defined(__APPLE__) || defined(__ANDROID__)
-#define COMPILE_10BIT=0
+#define BIT_DEPTH 8
 #endif
