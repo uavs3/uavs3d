@@ -1086,7 +1086,7 @@ void* __cdecl uavs3d_create(uavs3d_cfg_t * dec_cfg, uavs3d_lib_output_callback_t
 #elif defined(ENABLE_FUNCTION_X86)
     uavs3d_funs_init_sse();
     if (uavs3d_simd_avx_level(NULL) >= 2) {
-        uavs3d_funs_init_avx2();
+        //uavs3d_funs_init_avx2();
     }
 #endif
 
