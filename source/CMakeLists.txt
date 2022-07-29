@@ -76,7 +76,7 @@ elseif("${UAVS3D_TARGET_CPU}" MATCHES "arm64")
   enable_language(ASM)
 endif()
 
-if(${COMPILE_10BIT})
+if(COMPILE_10BIT)
     add_definitions(-DCOMPILE_10BIT=1)
     message("-- compile 10bit")
 else()
