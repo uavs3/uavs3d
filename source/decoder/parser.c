@@ -1647,7 +1647,7 @@ static uavs3d_always_inline u32 lbac_read_unary_sym_ep(com_lbac_t * lbac)
             low = lbac_refill2(lbac, low);
         }
         val += bin;
-    } while (bin);
+    } while (bin && lbac->cur < lbac->end);
 
     lbac->range = range;
     lbac->low = low;
@@ -2834,8 +2834,7 @@ int dec_parse_lcu_delta_qp(com_lbac_t * lbac, int last_dqp)
             bin = lbac_dec_bin(lbac, ctx->lcu_qp_delta + act_ctx);
             act_ctx = min(3, act_ctx + 1);
             act_sym += !bin;
-        }
-        while (!bin);
+        } while (!bin && lbac->cur < lbac->end);
     }
 
     dquant = (act_sym + 1) >> 1;
