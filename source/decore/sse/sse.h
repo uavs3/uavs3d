@@ -41,7 +41,8 @@
 #include "modules.h"
 
 #if __x86_64__
-#elif	__i386__
+#elif __i386__ && !defined(_mm_extract_epi64)
+#define _mm_extract_epi64 _mm_extract_epi64
 #include <stdint.h>
 static inline int64_t _mm_extract_epi64(__m128i a, const int imm8) {
     return imm8 ? ((int64_t)_mm_extract_epi16(a, 7) << 48) |
