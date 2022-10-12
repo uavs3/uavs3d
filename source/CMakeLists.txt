@@ -19,6 +19,8 @@ elseif("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "aarch64")
   set(UAVS3D_TARGET_CPU "arm64")
 elseif("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "^arm")
   set(UAVS3D_TARGET_CPU "armv7")
+elseif("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "loongarch64")
+  set(UAVS3D_TARGET_CPU "loongarch64")
 else()
   message(WARNING "unsupported architecture: ${CMAKE_SYSTEM_PROCESSOR}\n")
   set(UAVS3D_TARGET_CPU "generic")
@@ -74,6 +76,8 @@ elseif("${UAVS3D_TARGET_CPU}" MATCHES "arm64")
 
   add_definitions(-D _arm64)
   enable_language(ASM)
+elseif("${UAVS3D_TARGET_CPU}" MATCHES "loongarch64")
+  # loongarch64
 endif()
 
 if(COMPILE_10BIT)
