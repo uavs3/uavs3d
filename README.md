@@ -44,8 +44,11 @@ Prerequisites:
   XCode
 
 Build:
-1. ./version.sh (generate the version.h) 
-2. xcode solution file: build/ios/uavs3d.xcodeproj
+  1. ./version.sh (generate the version.h) 
+  2. xcode solution file: build/ios/uavs3d.xcodeproj
+
+  To support 10bit streams decoding:
+  Find Xcode -> PROJECT -> Build Settings -> Preprocessor Macros, add COMPILE_10BIT=1
 
 ## android
 Prerequisites:
@@ -55,6 +58,10 @@ Build ndk library or executable file:
   1. ./version.sh (generate the version.h)
   2. cd build/android/ndk/jni
   3. $NDK_PATH/ndk-build  
+
+  To support 10bit streams decoding: edit build/android/ndk/jni/uavs3d_main.mk:
+  
+  LOCAL_CFLAGS	+= -DCOMPILE_10BIT=1
 
 # Run tests
 ## window/linux/mac/android
