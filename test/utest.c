@@ -407,10 +407,13 @@ void output_callback(uavs3d_io_frm_t *frm) {
 }
 
 #if defined(__APPLE__) && (defined(__arm64__) || defined(__ARM_NEON__))
-int uavs3d_decode_sample(int argc, const char **argv)
-#else
-int main(int argc, const char **argv)
+#include <TargetConditionals.h>
+#if !TARGET_OS_OSX
+#define main uavs3d_decode_sample
 #endif
+#endif
+
+int main(int argc, const char **argv)
 {
     int               decoding = 1;
     unsigned char   * bs_buf = NULL;

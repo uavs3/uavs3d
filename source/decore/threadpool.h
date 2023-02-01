@@ -11,9 +11,6 @@ typedef volatile long atom_t;   // 32 bits, signed
 #if defined(_WIN32)
 #include "win32thread.h"
 #else
-
-#pragma comment(lib, "pthreadVC2.lib")
-
 #include <pthread.h>
 #define uavs3d_pthread_t                pthread_t
 #define uavs3d_pthread_create           pthread_create
