@@ -27,6 +27,9 @@ uavs3d_srcs_c   += $(SRC_PATH)/decoder/dec_util.c
 
 LOCAL_CFLAGS    += -O3 -fPIC -std=gnu99 -I../../../source/decore
 
+### To support 10bit streams decoding: edit it to -DCOMPILE_10BIT=1
+LOCAL_CFLAGS	+= -DCOMPILE_10BIT=0
+
 ifeq ($(TARGET_ARCH),arm)
     ifeq ($(TARGET_ARCH_ABI), armeabi-v7a)
         # build armv7a

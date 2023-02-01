@@ -97,7 +97,7 @@ static void uavs3d_padding_rows_chroma_arm64(pel *src, int i_src, int width, int
 
 void uavs3d_funs_init_arm64()
 {
-#if (BIT_DEPTH == 8)
+#if !COMPILE_10BIT
     uavs3d_funs_handle.sao[ Y_C] = uavs3d_sao_on_lcu_arm64;
     uavs3d_funs_handle.sao[UV_C] = uavs3d_sao_on_lcu_chroma_arm64;
     uavs3d_funs_handle.alf[ Y_C] = uavs3d_alf_one_lcu_arm64;

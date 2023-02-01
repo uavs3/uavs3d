@@ -237,7 +237,7 @@ void uavs3d_itrans_dct2_h64_w64_armv7(s16 *src, s16 *dst, int bit_depth)
 
 void uavs3d_funs_init_armv7()
 {
-#if BIT_DEPTH == 8
+#if !COMPILE_10BIT
     uavs3d_funs_handle.sao[ Y_C] = uavs3d_sao_on_lcu_armv7;
     uavs3d_funs_handle.sao[UV_C] = uavs3d_sao_on_lcu_chroma_armv7;
     uavs3d_funs_handle.alf[ Y_C] = uavs3d_alf_one_lcu_armv7;
