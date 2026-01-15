@@ -12,7 +12,8 @@ if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "AMD64" OR
               " Unexpected pointer size ${CMAKE_SIZEOF_VOID_P} for ${CMAKE_SYSTEM_PROCESSOR}\n")
   endif()
 elseif("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "i386" OR
-       "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86")
+       "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86" OR
+        "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "i686")
   set(UAVS3D_TARGET_CPU "x86")
 elseif("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "aarch64" OR
        "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm64")
@@ -63,7 +64,8 @@ elseif("${UAVS3D_TARGET_CPU}" MATCHES "armv7")
   # Add NEON support for ARMv7
   # Use hard float ABI to match the musleabihf toolchain
   # Use a specific CPU that supports NEON and hard float
-  set(ARMV7_FLAGS "-mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard")
+  # Removed -mfloat-abi=hard as it didnt work with
+  set(ARMV7_FLAGS "-mcpu=cortex-a9 -mfpu=neon")
   
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ARMV7_FLAGS}")
   set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} ${ARMV7_FLAGS}")
@@ -115,7 +117,9 @@ MESSAGE(STATUS "uavs3d version \t\t: ${uavs3d_version}")
 
 MESSAGE(STATUS "Target CPU\t\t\t: ${UAVS3D_TARGET_CPU}")
 # pkg-config
-find_package(Threads REQUIRED)
+if(NOT ANDROID)
+    find_package(Threads REQUIRED)
+endif()
 set(prefix "${CMAKE_INSTALL_PREFIX}")
 set(includedir "include")
 set(libdir "lib")
@@ -154,7 +158,7 @@ add_library(${LIBNAME} ${DIR_UAVS3D_SRC} ${UAVS3D_ASM_FILES})
 if (NOT MSVC)
     target_link_libraries(${LIBNAME} m)
 endif()
-if(CMAKE_USE_PTHREADS_INIT)
+if(CMAKE_USE_PTHREADS_INIT AND NOT ANDROID)
 target_link_libraries(${LIBNAME} pthread)
 endif()
 
