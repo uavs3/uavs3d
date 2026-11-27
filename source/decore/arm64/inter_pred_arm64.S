@@ -3733,7 +3733,7 @@ if_hor_luma_w8_loop_y:
 //src->x0, i_src->x1, dst->x2, i_dst->x3, width->x4, height->x5, coeff->x6, max_val->x7
 function uavs3d_if_hor_luma_w16_arm64
     sub sp, sp, #80
-    sub x8, sp, #16
+    add x8, sp, #64
     st1 {v12.2d, v13.2d, v14.2d, v15.2d}, [sp]
     st1 {v11.2d}, [x8]
     
@@ -3822,7 +3822,7 @@ if_hor_luma_w16_loop_y:
     st1 {v28.8h, v29.8h}, [x2], x3
     bgt if_hor_luma_w16_loop_y
 
-    st1 {v12.2d, v13.2d, v14.2d, v15.2d}, [sp], #64
+    ld1 {v12.2d, v13.2d, v14.2d, v15.2d}, [sp], #64
     ld1 {v11.2d}, [sp], #16
 
     ret
@@ -3831,7 +3831,7 @@ if_hor_luma_w16_loop_y:
 //src->x0, i_src->x1, dst->x2, i_dst->x3, width->x4, height->x5, coeff->x6, max_val->x7
 function uavs3d_if_hor_luma_w16x_arm64
     sub sp, sp, #80
-    sub x8, sp, #16
+    add x8, sp, #64
     st1 {v12.2d, v13.2d, v14.2d, v15.2d}, [sp]
     st1 {v11.2d}, [x8]
 
@@ -4498,7 +4498,7 @@ if_ver_luma_w16_loop_y:
 //src->x0, i_src->x1, dst->x2, i_dst->x3, width->x4, height->x5, coeff->x6, max_val->x7
 function uavs3d_if_ver_luma_w16x_arm64
     sub sp, sp, #80
-    sub x8, sp, #16
+    add x8, sp, #64
     st1 {v12.2d, v13.2d, v14.2d, v15.2d}, [sp]
     st1 {v8.2d}, [x8]
 
@@ -5696,7 +5696,7 @@ function uavs3d_if_hor_ver_luma_w16_arm64
     ldr w8, [sp]                            // max_val
 
     sub sp, sp, #80
-    sub x9, sp, #16
+    add x9, sp, #64
     st1 {v10.2d, v11.2d, v12.2d, v13.2d}, [sp]
     st1 {v14.2d}, [x9]
 
@@ -6081,7 +6081,7 @@ function uavs3d_if_hor_ver_luma_w32_arm64
     ldr w8, [sp]
 
     sub sp, sp, #48
-    sub x9, sp, #16
+    add x9, sp, #32
     st1 {v8.2d, v9.2d}, [sp]
     st1 {v10.2d}, [x9]
 
@@ -6550,7 +6550,7 @@ function uavs3d_if_hor_ver_luma_w32x_arm64
     ldr w8, [sp]
 
     sub sp, sp, #48
-    sub x9, sp, #16
+    add x9, sp, #32
     st1 {v8.2d, v9.2d}, [sp]
     st1 {v10.2d}, [x9]
 
@@ -7699,7 +7699,7 @@ function uavs3d_if_hor_ver_chroma_w32_arm64
     lsl x3, x3, #1
 
     sub sp, sp, #80
-    sub x9, sp, #16
+    add x9, sp, #64
     st1 {v12.2d, v13.2d, v14.2d, v15.2d}, [sp]
     st1 {v11.2d}, [x9]
 
@@ -8109,7 +8109,7 @@ function uavs3d_if_hor_ver_chroma_w32x_arm64
     lsl x3, x3, #1
 
     sub sp, sp, #80
-    sub x9, sp, #16
+    add x9, sp, #64
     st1 {v12.2d, v13.2d, v14.2d, v15.2d}, [sp]
     st1 {v11.2d}, [x9]
 

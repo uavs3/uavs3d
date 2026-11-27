@@ -112,12 +112,12 @@ intra_pred_hor_uv_w16:
 	b intra_pred_hor_uv_end
 
 intra_pred_hor_uv_w32:
-    ld1 {v14.4h}, [x0]
+    ld1 {v16.4h}, [x0]
 
-    dup v0.8h, v14.h[3]
-    dup v4.8h, v14.h[2]
-    dup v18.8h, v14.h[1]
-    dup v22.8h, v14.h[0]
+    dup v0.8h, v16.h[3]
+    dup v4.8h, v16.h[2]
+    dup v18.8h, v16.h[1]
+    dup v22.8h, v16.h[0]
 
     sub x0, x0, #8
 
